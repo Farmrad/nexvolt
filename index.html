@@ -1,61 +1,127 @@
-<main id="app">
+<!DOCTYPE html>
+<html lang="en">
 
-  <!-- DASHBOARD -->
-  <section class="page active" id="dashboardPage">
-    <h2>Dashboard</h2>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <div class="card">
-      <p>Nexvolt Mobile System ⚡</p>
-    </div>
+  <title>Nexvolt</title>
 
-    <div class="grid">
-      <button onclick="showPage('jobsPage')">Jobs</button>
-      <button onclick="showPage('clientsPage')">Clients</button>
-      <button onclick="showPage('financePage')">Finance</button>
-    </div>
-  </section>
+  <link rel="stylesheet" href="style.css">
+</head>
 
-  <!-- JOBS -->
-  <section class="page" id="jobsPage">
-    <h2>Jobs</h2>
+<body onload="initApp()">
 
-    <div class="card">
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <h1>Nexvolt ⚡</h1>
+  </header>
 
-      <input type="text" id="jobType" placeholder="Job type">
+  <!-- APP -->
+  <main id="app">
 
-      <input type="number" id="jobTotal" placeholder="Total price">
+    <!-- DASHBOARD -->
+    <section class="page active" id="dashboardPage">
 
-      <button onclick="saveJob()">Save Job</button>
+      <h2>Dashboard</h2>
 
-    </div>
+      <div class="card">
+        <p>Nexvolt Mobile System</p>
+      </div>
 
-    <div id="jobsList"></div>
-  </section>
+      <div class="grid">
+        <button onclick="showPage('jobsPage')">
+          Jobs
+        </button>
 
-  <!-- CLIENTS -->
-  <section class="page" id="clientsPage">
-    <h2>Clients</h2>
+        <button onclick="showPage('clientsPage')">
+          Clients
+        </button>
 
-    <div class="card">
+        <button onclick="showPage('financePage')">
+          Finance
+        </button>
+      </div>
 
-      <input type="text" id="clientName" placeholder="Client name">
+    </section>
 
-      <input type="text" id="clientPhone" placeholder="Phone number">
+    <!-- JOBS PAGE -->
+    <section class="page" id="jobsPage">
 
-      <button onclick="saveClient()">Save Client</button>
+      <h2>Jobs</h2>
 
-    </div>
+      <div class="card">
 
-    <div id="clientsList"></div>
-  </section>
+        <input
+          type="text"
+          id="jobType"
+          placeholder="Job type"
+        >
 
-  <!-- FINANCE -->
-  <section class="page" id="financePage">
-    <h2>Finance</h2>
+        <input
+          type="number"
+          id="jobTotal"
+          placeholder="Total price"
+        >
 
-    <div class="card">
-      <p>Finance system coming next</p>
-    </div>
-  </section>
+        <button onclick="saveJob()">
+          Save Job
+        </button>
 
-</main>
+      </div>
+
+      <div id="jobsList"></div>
+
+    </section>
+
+    <!-- CLIENTS PAGE -->
+    <section class="page" id="clientsPage">
+
+      <h2>Clients</h2>
+
+      <div class="card">
+
+        <input
+          type="text"
+          id="clientName"
+          placeholder="Client name"
+        >
+
+        <input
+          type="text"
+          id="clientPhone"
+          placeholder="Phone number"
+        >
+
+        <button onclick="saveClient()">
+          Save Client
+        </button>
+
+      </div>
+
+      <div id="clientsList"></div>
+
+    </section>
+
+    <!-- FINANCE PAGE -->
+    <section class="page" id="financePage">
+
+      <h2>Finance</h2>
+
+      <div class="card">
+        <p>Finance system coming next</p>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- DATABASE -->
+  <script src="db/db.js"></script>
+
+  <!-- APP LOGIC -->
+  <script src="app.js"></script>
+
+</body>
+
+</html>
