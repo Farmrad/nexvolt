@@ -1,12 +1,60 @@
 function initApp() {
   initDB();
   loadJobs();
+  loadClients();
 }
 
-// -------------------- CLIENT --------------------
-function addClient() {
-  let name = prompt("Client name:");
-  let phone = prompt("Phone:");
+// NAVIGATION
+function showPage(pageId) {
+  document.querySelectorAll(".page").forEach(p => {
+    p.classList.remove("active");
+  });
+
+  document.getElementById(pageId).classList.add("active");
+}
+
+// ---------------- JOBS ----------------
+function openJobForm() {
+  const type = prompt("Job type:");
+  const total = prompt("Total price:");
+
+  let tx = db.transaction("jobs", "readwrite");
+  let store = tx.objectStore("jobs");
+
+  store.add({
+    type,
+    total,
+    createdAt: new Date()
+  });
+
+  loadJobs();
+}
+
+function loadJobs() {
+  let tx = db.transaction("jobs", "readonly");
+  let store = tx.objectStore("jobs");
+
+  let req = store.getAll();
+
+  req.onsuccess = () => {
+    let html = "";
+    req.result.forEach(job => {
+      html += `
+        <div class="card">
+          <b>${job.type}</b><br>
+          ${job.total} TND
+        </div>
+      `;
+    });
+
+    document.getElementById("jobsList").innerHTML = html;
+  };
+}
+
+// ---------------- CLIENTS ----------------
+function openClientForm() {
+  const name = prompt("Client name:");
+  const phone = prompt("Phone:");
 
   let tx = db.transaction("clients", "readwrite");
   let store = tx.objectStore("clients");
@@ -17,63 +65,26 @@ function addClient() {
     createdAt: new Date()
   });
 
-  alert("Client added");
+  loadClients();
 }
 
-// -------------------- JOB --------------------
-function addJob() {
-  let type = prompt("Job type (dépannage / installation):");
-  let total = prompt("Total price:");
+function loadClients() {
+  let tx = db.transaction("clients", "readonly");
+  let store = tx.objectStore("clients");
 
-  let tx = db.transaction("jobs", "readwrite");
-  let store = tx.objectStore("jobs");
+  let req = store.getAll();
 
-  store.add({
-    type,
-    total,
-    status: "active",
-    createdAt: new Date()
-  });
-
-  loadJobs();
-}
-
-// -------------------- LOAD JOBS --------------------
-function loadJobs() {
-  let tx = db.transaction("jobs", "readonly");
-  let store = tx.objectStore("jobs");
-
-  let request = store.getAll();
-
-  request.onsuccess = function () {
-    let jobs = request.result;
-
+  req.onsuccess = () => {
     let html = "";
-    jobs.forEach(job => {
+    req.result.forEach(c => {
       html += `
-        <div style="padding:10px; background:#111827; margin:5px; border-radius:6px;">
-          <b>${job.type}</b> - ${job.total} TND
+        <div class="card">
+          <b>${c.name}</b><br>
+          ${c.phone}
         </div>
       `;
     });
 
-    document.getElementById("jobsList").innerHTML = html;
+    document.getElementById("clientsList").innerHTML = html;
   };
-}
-
-// -------------------- EXPENSE --------------------
-function addExpense() {
-  let category = prompt("Category (fuel/materials/etc):");
-  let amount = prompt("Amount:");
-
-  let tx = db.transaction("expenses", "readwrite");
-  let store = tx.objectStore("expenses");
-
-  store.add({
-    category,
-    amount,
-    date: new Date()
-  });
-
-  alert("Expense added");
 }
