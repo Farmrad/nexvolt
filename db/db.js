@@ -1,50 +1,16 @@
 let db;
 
 function initDB() {
-  const request = indexedDB.open("NexvoltDB", 2);
+  const req = indexedDB.open("NexvoltDB", 1);
 
-  request.onupgradeneeded = function (event) {
-    db = event.target.result;
+  req.onupgradeneeded = e => {
+    db = e.target.result;
 
-    // CLIENTS
-    if (!db.objectStoreNames.contains("clients")) {
-      db.createObjectStore("clients", {
-        keyPath: "id",
-        autoIncrement: true
-      });
-    }
-
-    // JOBS
-    if (!db.objectStoreNames.contains("jobs")) {
-      db.createObjectStore("jobs", {
-        keyPath: "id",
-        autoIncrement: true
-      });
-    }
-
-    // EXPENSES
-    if (!db.objectStoreNames.contains("expenses")) {
-      db.createObjectStore("expenses", {
-        keyPath: "id",
-        autoIncrement: true
-      });
-    }
-
-    // INVOICES
-    if (!db.objectStoreNames.contains("invoices")) {
-      db.createObjectStore("invoices", {
-        keyPath: "id",
-        autoIncrement: true
-      });
-    }
+    db.createObjectStore("clients", { keyPath: "id", autoIncrement: true });
+    db.createObjectStore("jobs", { keyPath: "id", autoIncrement: true });
+    db.createObjectStore("expenses", { keyPath: "id", autoIncrement: true });
+    db.createObjectStore("invoices", { keyPath: "id", autoIncrement: true });
   };
 
-  request.onsuccess = function (event) {
-    db = event.target.result;
-    console.log("Nexvolt DB Ready");
-  };
-
-  request.onerror = function () {
-    console.error("Database failed");
-  };
+  req.onsuccess = e => db = e.target.result;
 }
