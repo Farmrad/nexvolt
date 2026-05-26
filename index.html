@@ -2,30 +2,61 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nexvolt</title>
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body onload="initApp()">
 
-  <header>
+  <!-- HEADER -->
+  <header class="topbar">
     <h1>Nexvolt ⚡</h1>
-    <p>Electrician Business System</p>
   </header>
 
-  <main>
+  <!-- MAIN CONTENT -->
+  <main id="app">
 
-    <section class="card">
-      <h2>Quick Actions</h2>
+    <!-- DASHBOARD -->
+    <section class="page active" id="dashboardPage">
+      <h2>Dashboard</h2>
 
-      <button onclick="addClient()">➕ New Client</button>
-      <button onclick="addJob()">🛠 New Job</button>
-      <button onclick="addExpense()">💰 Add Expense</button>
+      <div class="card">
+        <p>Welcome to Nexvolt System</p>
+      </div>
+
+      <div class="grid">
+        <button onclick="showPage('jobsPage')">Jobs</button>
+        <button onclick="showPage('clientsPage')">Clients</button>
+        <button onclick="showPage('financePage')">Finance</button>
+      </div>
     </section>
 
-    <section class="card">
+    <!-- JOBS -->
+    <section class="page" id="jobsPage">
       <h2>Jobs</h2>
+
+      <button onclick="openJobForm()">+ New Job</button>
+
       <div id="jobsList"></div>
+    </section>
+
+    <!-- CLIENTS -->
+    <section class="page" id="clientsPage">
+      <h2>Clients</h2>
+
+      <button onclick="openClientForm()">+ New Client</button>
+
+      <div id="clientsList"></div>
+    </section>
+
+    <!-- FINANCE -->
+    <section class="page" id="financePage">
+      <h2>Finance</h2>
+
+      <div class="card">
+        <p>Income / Expenses / Profit coming next</p>
+      </div>
     </section>
 
   </main>
