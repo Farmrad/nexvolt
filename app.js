@@ -16,13 +16,24 @@ function showPage(id) {
   document.getElementById(id).classList.add("active");
 }
 
-/* CLIENTS */
+/* ================= CLIENTS ================= */
 function saveClient() {
-  let tx = db.transaction("clients", "readwrite");
+  let tx = db.transaction("clients","readwrite");
+
   tx.objectStore("clients").add({
     name: clientName.value,
     phone: clientPhone.value
   });
+
+  tx.oncomplete = () => {
+    loadClients();
+    loadClientOptions();
+  };
+}
+
+function deleteClient(id){
+  let tx = db.transaction("clients","readwrite");
+  tx.objectStore("clients").delete(id);
   tx.oncomplete = () => {
     loadClients();
     loadClientOptions();
@@ -30,18 +41,21 @@ function saveClient() {
 }
 
 function loadClients() {
-  let tx = db.transaction("clients", "readonly");
+  let tx = db.transaction("clients","readonly");
   let req = tx.objectStore("clients").getAll();
 
   req.onsuccess = () => {
-    clientsList.innerHTML = req.result.map(c =>
-      `<div class="job-card">${c.name} - ${c.phone}</div>`
-    ).reverse().join("");
+    clientsList.innerHTML = req.result.reverse().map(c =>
+      `<div class="job-card">
+        ${c.name} - ${c.phone}
+        <button onclick="deleteClient(${c.id})">Delete</button>
+      </div>`
+    ).join("");
   };
 }
 
 function loadClientOptions() {
-  let tx = db.transaction("clients", "readonly");
+  let tx = db.transaction("clients","readonly");
   let req = tx.objectStore("clients").getAll();
 
   req.onsuccess = () => {
@@ -51,9 +65,9 @@ function loadClientOptions() {
   };
 }
 
-/* JOBS */
+/* ================= JOBS ================= */
 function saveJob() {
-  let tx = db.transaction("jobs", "readwrite");
+  let tx = db.transaction("jobs","readwrite");
 
   tx.objectStore("jobs").add({
     clientId: Number(jobClient.value),
@@ -62,6 +76,15 @@ function saveJob() {
     status: jobStatus.value
   });
 
+  tx.oncomplete = () => {
+    loadJobs();
+    loadDashboard();
+  };
+}
+
+function deleteJob(id){
+  let tx = db.transaction("jobs","readwrite");
+  tx.objectStore("jobs").delete(id);
   tx.oncomplete = () => {
     loadJobs();
     loadDashboard();
@@ -83,8 +106,12 @@ function loadJobs() {
         req.onsuccess = () => r(req.result);
       });
 
-      html += `<div class="job-card">
-        ${j.type}<br>${c?.name}<br>${j.total} TND - ${j.status}
+      html += `
+      <div class="job-card">
+        ${j.type}<br>
+        ${c?.name || "Unknown"}<br>
+        ${j.total} TND - ${j.status}
+        <button onclick="deleteJob(${j.id})">Delete</button>
       </div>`;
     }
 
@@ -92,7 +119,7 @@ function loadJobs() {
   };
 }
 
-/* EXPENSES */
+/* ================= EXPENSES ================= */
 function saveExpense() {
   let tx = db.transaction("expenses","readwrite");
 
@@ -107,18 +134,31 @@ function saveExpense() {
   };
 }
 
+function deleteExpense(id){
+  let tx = db.transaction("expenses","readwrite");
+  tx.objectStore("expenses").delete(id);
+
+  tx.oncomplete = () => {
+    loadExpenses();
+    loadDashboard();
+  };
+}
+
 function loadExpenses() {
   let tx = db.transaction("expenses","readonly");
   let req = tx.objectStore("expenses").getAll();
 
   req.onsuccess = () => {
-    expensesList.innerHTML = req.result.map(e =>
-      `<div class="job-card">${e.category} - ${e.amount}</div>`
-    ).reverse().join("");
+    expensesList.innerHTML = req.result.reverse().map(e =>
+      `<div class="job-card">
+        ${e.category} - ${e.amount}
+        <button onclick="deleteExpense(${e.id})">Delete</button>
+      </div>`
+    ).join("");
   };
 }
 
-/* INVOICES */
+/* ================= INVOICES ================= */
 function createInvoice() {
   let tx = db.transaction(["jobs","invoices"],"readwrite");
 
@@ -144,19 +184,27 @@ function createInvoice() {
   };
 }
 
+function deleteInvoice(id){
+  let tx = db.transaction("invoices","readwrite");
+  tx.objectStore("invoices").delete(id);
+  tx.oncomplete = loadInvoices;
+}
+
 function loadInvoices() {
   let tx = db.transaction("invoices","readonly");
   let req = tx.objectStore("invoices").getAll();
 
   req.onsuccess = () => {
-    invoiceList.innerHTML = req.result.map(i =>
+    invoiceList.innerHTML = req.result.reverse().map(i =>
       `<div class="job-card">
         Sub:${i.subtotal} | TVA:${i.tva}% | Total:${i.total}
+        <button onclick="deleteInvoice(${i.id})">Delete</button>
       </div>`
-    ).reverse().join("");
+    ).join("");
   };
 }
 
+/* ================= DASHBOARD ================= */
 function loadDashboard() {
   let tx = db.transaction(["jobs","expenses"],"readonly");
 
