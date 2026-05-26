@@ -1,11 +1,11 @@
 body {
   margin: 0;
-  font-family: Arial;
+  font-family: Arial, sans-serif;
   background: #0b1220;
   color: white;
 }
 
-/* TOP BAR */
+/* HEADER */
 .topbar {
   background: #111827;
   padding: 15px;
@@ -22,15 +22,17 @@ body {
   display: block;
 }
 
-/* CARDS */
+/* CARD */
 .card {
   background: #1f2937;
   padding: 15px;
   border-radius: 10px;
   margin-top: 10px;
+  display: flex;
+  flex-direction: column;
 }
 
-/* GRID BUTTONS */
+/* GRID */
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -38,14 +40,9 @@ body {
   margin-top: 15px;
 }
 
-button {
-  padding: 12px;
-  border: none;
-  border-radius: 8px;
-  background: #2563eb;
-  color: white;
-}
-input {
+/* INPUTS */
+input,
+select {
   width: 100%;
   padding: 12px;
   margin-top: 10px;
@@ -54,12 +51,22 @@ input {
   box-sizing: border-box;
 }
 
+/* BUTTON */
 button {
   width: 100%;
   margin-top: 10px;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
 }
 
-.card {
-  display: flex;
-  flex-direction: column;
+/* JOB ITEM */
+.job-card {
+  background: #1f2937;
+  padding: 15px;
+  margin-top: 10px;
+  border-radius: 10px;
 }
