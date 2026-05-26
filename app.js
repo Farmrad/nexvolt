@@ -5,158 +5,174 @@ function initApp() {
     loadClients();
     loadClientOptions();
     loadJobs();
+    loadExpenses();
+    loadInvoices();
+    loadDashboard();
   }, 300);
 }
 
-// ---------------- NAVIGATION ----------------
-function showPage(pageId) {
-  document.querySelectorAll(".page").forEach(page => {
-    page.classList.remove("active");
-  });
-
-  document.getElementById(pageId).classList.add("active");
+function showPage(id) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
 }
 
-// ---------------- SAVE CLIENT ----------------
+/* CLIENTS */
 function saveClient() {
-  const name = document.getElementById("clientName").value;
-  const phone = document.getElementById("clientPhone").value;
-
-  if (!name || !phone) {
-    alert("Please fill all fields");
-    return;
-  }
-
   let tx = db.transaction("clients", "readwrite");
-  let store = tx.objectStore("clients");
-
-  store.add({
-    name,
-    phone,
-    createdAt: new Date()
+  tx.objectStore("clients").add({
+    name: clientName.value,
+    phone: clientPhone.value
   });
-
   tx.oncomplete = () => {
-    document.getElementById("clientName").value = "";
-    document.getElementById("clientPhone").value = "";
-
     loadClients();
     loadClientOptions();
   };
 }
 
-// ---------------- LOAD CLIENTS ----------------
 function loadClients() {
   let tx = db.transaction("clients", "readonly");
-  let store = tx.objectStore("clients");
-
-  let req = store.getAll();
+  let req = tx.objectStore("clients").getAll();
 
   req.onsuccess = () => {
-    let html = "";
-
-    req.result.reverse().forEach(client => {
-      html += `
-        <div class="job-card">
-          <b>${client.name}</b><br>
-          ${client.phone}
-        </div>
-      `;
-    });
-
-    document.getElementById("clientsList").innerHTML = html;
+    clientsList.innerHTML = req.result.map(c =>
+      `<div class="job-card">${c.name} - ${c.phone}</div>`
+    ).reverse().join("");
   };
 }
 
-// ---------------- CLIENT OPTIONS ----------------
 function loadClientOptions() {
   let tx = db.transaction("clients", "readonly");
-  let store = tx.objectStore("clients");
-
-  let req = store.getAll();
+  let req = tx.objectStore("clients").getAll();
 
   req.onsuccess = () => {
-    let html = `<option value="">Select Client</option>`;
-
-    req.result.forEach(client => {
-      html += `
-        <option value="${client.id}">
-          ${client.name}
-        </option>
-      `;
-    });
-
-    document.getElementById("jobClient").innerHTML = html;
+    jobClient.innerHTML = req.result.map(c =>
+      `<option value="${c.id}">${c.name}</option>`
+    ).join("");
   };
 }
 
-// ---------------- SAVE JOB ----------------
+/* JOBS */
 function saveJob() {
-  const clientId = Number(document.getElementById("jobClient").value);
-  const type = document.getElementById("jobType").value;
-  const total = document.getElementById("jobTotal").value;
-  const status = document.getElementById("jobStatus").value;
-
-  if (!clientId || !type || !total) {
-    alert("Please fill all fields");
-    return;
-  }
-
   let tx = db.transaction("jobs", "readwrite");
-  let store = tx.objectStore("jobs");
 
-  store.add({
-    clientId,
-    type,
-    total,
-    status,
-    createdAt: new Date()
+  tx.objectStore("jobs").add({
+    clientId: Number(jobClient.value),
+    type: jobType.value,
+    total: Number(jobTotal.value),
+    status: jobStatus.value
   });
 
   tx.oncomplete = () => {
-    document.getElementById("jobClient").value = "";
-    document.getElementById("jobType").value = "";
-    document.getElementById("jobTotal").value = "";
-
     loadJobs();
+    loadDashboard();
   };
 }
 
-// ---------------- LOAD JOBS ----------------
 function loadJobs() {
-  let tx = db.transaction(["jobs", "clients"], "readonly");
+  let tx = db.transaction(["jobs","clients"],"readonly");
 
-  let jobsStore = tx.objectStore("jobs");
+  let jobsReq = tx.objectStore("jobs").getAll();
   let clientsStore = tx.objectStore("clients");
 
-  let req = jobsStore.getAll();
-
-  req.onsuccess = async () => {
-    let jobs = req.result.reverse();
-
+  jobsReq.onsuccess = async () => {
     let html = "";
 
-    for (const job of jobs) {
-      let clientReq = clientsStore.get(job.clientId);
-
-      await new Promise(resolve => {
-        clientReq.onsuccess = () => {
-          const client = clientReq.result;
-
-          html += `
-            <div class="job-card">
-              <b>${job.type}</b><br>
-              Client: ${client ? client.name : "Unknown"}<br>
-              ${job.total} TND<br>
-              Status: ${job.status}
-            </div>
-          `;
-
-          resolve();
-        };
+    for (let j of jobsReq.result.reverse()) {
+      let c = await new Promise(r => {
+        let req = clientsStore.get(j.clientId);
+        req.onsuccess = () => r(req.result);
       });
+
+      html += `<div class="job-card">
+        ${j.type}<br>${c?.name}<br>${j.total} TND - ${j.status}
+      </div>`;
     }
 
-    document.getElementById("jobsList").innerHTML = html;
+    jobsList.innerHTML = html;
+  };
+}
+
+/* EXPENSES */
+function saveExpense() {
+  let tx = db.transaction("expenses","readwrite");
+
+  tx.objectStore("expenses").add({
+    category: expenseCategory.value,
+    amount: Number(expenseAmount.value)
+  });
+
+  tx.oncomplete = () => {
+    loadExpenses();
+    loadDashboard();
+  };
+}
+
+function loadExpenses() {
+  let tx = db.transaction("expenses","readonly");
+  let req = tx.objectStore("expenses").getAll();
+
+  req.onsuccess = () => {
+    expensesList.innerHTML = req.result.map(e =>
+      `<div class="job-card">${e.category} - ${e.amount}</div>`
+    ).reverse().join("");
+  };
+}
+
+/* INVOICES */
+function createInvoice() {
+  let tx = db.transaction(["jobs","invoices"],"readwrite");
+
+  let jobStore = tx.objectStore("jobs");
+  let invStore = tx.objectStore("invoices");
+
+  let req = jobStore.get(Number(invoiceJob.value));
+
+  req.onsuccess = () => {
+    let job = req.result;
+    let tva = Number(tvaRate.value || 19);
+
+    let tvaAmount = job.total * tva / 100;
+
+    invStore.add({
+      jobId: job.id,
+      subtotal: job.total,
+      tva,
+      total: job.total + tvaAmount
+    });
+
+    tx.oncomplete = loadInvoices;
+  };
+}
+
+function loadInvoices() {
+  let tx = db.transaction("invoices","readonly");
+  let req = tx.objectStore("invoices").getAll();
+
+  req.onsuccess = () => {
+    invoiceList.innerHTML = req.result.map(i =>
+      `<div class="job-card">
+        Sub:${i.subtotal} | TVA:${i.tva}% | Total:${i.total}
+      </div>`
+    ).reverse().join("");
+  };
+}
+
+function loadDashboard() {
+  let tx = db.transaction(["jobs","expenses"],"readonly");
+
+  let jReq = tx.objectStore("jobs").getAll();
+  let eReq = tx.objectStore("expenses").getAll();
+
+  jReq.onsuccess = () => {
+    eReq.onsuccess = () => {
+
+      let income = jReq.result.reduce((a,b)=>a+b.total,0);
+      let expense = eReq.result.reduce((a,b)=>a+b.amount,0);
+
+      totalIncome.innerText = income+" TND";
+      totalExpenses.innerText = expense+" TND";
+      profit.innerText = (income-expense)+" TND";
+      totalJobs.innerText = jReq.result.length;
+    };
   };
 }
