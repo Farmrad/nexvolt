@@ -1,22 +1,31 @@
 function initApp() {
   initDB();
-  loadJobs();
-  loadClients();
+
+  // Small delay to ensure DB is ready
+  setTimeout(() => {
+    loadJobs();
+    loadClients();
+  }, 200);
 }
 
-// NAVIGATION
+// ---------------- NAVIGATION ----------------
 function showPage(pageId) {
-  document.querySelectorAll(".page").forEach(p => {
-    p.classList.remove("active");
+  document.querySelectorAll(".page").forEach(page => {
+    page.classList.remove("active");
   });
 
   document.getElementById(pageId).classList.add("active");
 }
 
-// ---------------- JOBS ----------------
-function openJobForm() {
-  const type = prompt("Job type:");
-  const total = prompt("Total price:");
+// ---------------- SAVE JOB ----------------
+function saveJob() {
+  const type = document.getElementById("jobType").value;
+  const total = document.getElementById("jobTotal").value;
+
+  if (!type || !total) {
+    alert("Please fill all fields");
+    return;
+  }
 
   let tx = db.transaction("jobs", "readwrite");
   let store = tx.objectStore("jobs");
@@ -24,12 +33,19 @@ function openJobForm() {
   store.add({
     type,
     total,
+    status: "active",
     createdAt: new Date()
   });
 
-  loadJobs();
+  tx.oncomplete = () => {
+    document.getElementById("jobType").value = "";
+    document.getElementById("jobTotal").value = "";
+
+    loadJobs();
+  };
 }
 
+// ---------------- LOAD JOBS ----------------
 function loadJobs() {
   let tx = db.transaction("jobs", "readonly");
   let store = tx.objectStore("jobs");
@@ -38,7 +54,8 @@ function loadJobs() {
 
   req.onsuccess = () => {
     let html = "";
-    req.result.forEach(job => {
+
+    req.result.reverse().forEach(job => {
       html += `
         <div class="card">
           <b>${job.type}</b><br>
@@ -51,10 +68,15 @@ function loadJobs() {
   };
 }
 
-// ---------------- CLIENTS ----------------
-function openClientForm() {
-  const name = prompt("Client name:");
-  const phone = prompt("Phone:");
+// ---------------- SAVE CLIENT ----------------
+function saveClient() {
+  const name = document.getElementById("clientName").value;
+  const phone = document.getElementById("clientPhone").value;
+
+  if (!name || !phone) {
+    alert("Please fill all fields");
+    return;
+  }
 
   let tx = db.transaction("clients", "readwrite");
   let store = tx.objectStore("clients");
@@ -65,9 +87,15 @@ function openClientForm() {
     createdAt: new Date()
   });
 
-  loadClients();
+  tx.oncomplete = () => {
+    document.getElementById("clientName").value = "";
+    document.getElementById("clientPhone").value = "";
+
+    loadClients();
+  };
 }
 
+// ---------------- LOAD CLIENTS ----------------
 function loadClients() {
   let tx = db.transaction("clients", "readonly");
   let store = tx.objectStore("clients");
@@ -76,11 +104,12 @@ function loadClients() {
 
   req.onsuccess = () => {
     let html = "";
-    req.result.forEach(c => {
+
+    req.result.reverse().forEach(client => {
       html += `
         <div class="card">
-          <b>${c.name}</b><br>
-          ${c.phone}
+          <b>${client.name}</b><br>
+          ${client.phone}
         </div>
       `;
     });
