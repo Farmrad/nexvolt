@@ -1,11 +1,11 @@
 function initApp() {
   initDB();
 
-  // Small delay to ensure DB is ready
   setTimeout(() => {
-    loadJobs();
     loadClients();
-  }, 200);
+    loadClientOptions();
+    loadJobs();
+  }, 300);
 }
 
 // ---------------- NAVIGATION ----------------
@@ -15,57 +15,6 @@ function showPage(pageId) {
   });
 
   document.getElementById(pageId).classList.add("active");
-}
-
-// ---------------- SAVE JOB ----------------
-function saveJob() {
-  const type = document.getElementById("jobType").value;
-  const total = document.getElementById("jobTotal").value;
-
-  if (!type || !total) {
-    alert("Please fill all fields");
-    return;
-  }
-
-  let tx = db.transaction("jobs", "readwrite");
-  let store = tx.objectStore("jobs");
-
-  store.add({
-    type,
-    total,
-    status: "active",
-    createdAt: new Date()
-  });
-
-  tx.oncomplete = () => {
-    document.getElementById("jobType").value = "";
-    document.getElementById("jobTotal").value = "";
-
-    loadJobs();
-  };
-}
-
-// ---------------- LOAD JOBS ----------------
-function loadJobs() {
-  let tx = db.transaction("jobs", "readonly");
-  let store = tx.objectStore("jobs");
-
-  let req = store.getAll();
-
-  req.onsuccess = () => {
-    let html = "";
-
-    req.result.reverse().forEach(job => {
-      html += `
-        <div class="card">
-          <b>${job.type}</b><br>
-          ${job.total} TND
-        </div>
-      `;
-    });
-
-    document.getElementById("jobsList").innerHTML = html;
-  };
 }
 
 // ---------------- SAVE CLIENT ----------------
@@ -92,6 +41,7 @@ function saveClient() {
     document.getElementById("clientPhone").value = "";
 
     loadClients();
+    loadClientOptions();
   };
 }
 
@@ -107,7 +57,7 @@ function loadClients() {
 
     req.result.reverse().forEach(client => {
       html += `
-        <div class="card">
+        <div class="job-card">
           <b>${client.name}</b><br>
           ${client.phone}
         </div>
@@ -115,5 +65,98 @@ function loadClients() {
     });
 
     document.getElementById("clientsList").innerHTML = html;
+  };
+}
+
+// ---------------- CLIENT OPTIONS ----------------
+function loadClientOptions() {
+  let tx = db.transaction("clients", "readonly");
+  let store = tx.objectStore("clients");
+
+  let req = store.getAll();
+
+  req.onsuccess = () => {
+    let html = `<option value="">Select Client</option>`;
+
+    req.result.forEach(client => {
+      html += `
+        <option value="${client.id}">
+          ${client.name}
+        </option>
+      `;
+    });
+
+    document.getElementById("jobClient").innerHTML = html;
+  };
+}
+
+// ---------------- SAVE JOB ----------------
+function saveJob() {
+  const clientId = Number(document.getElementById("jobClient").value);
+  const type = document.getElementById("jobType").value;
+  const total = document.getElementById("jobTotal").value;
+  const status = document.getElementById("jobStatus").value;
+
+  if (!clientId || !type || !total) {
+    alert("Please fill all fields");
+    return;
+  }
+
+  let tx = db.transaction("jobs", "readwrite");
+  let store = tx.objectStore("jobs");
+
+  store.add({
+    clientId,
+    type,
+    total,
+    status,
+    createdAt: new Date()
+  });
+
+  tx.oncomplete = () => {
+    document.getElementById("jobClient").value = "";
+    document.getElementById("jobType").value = "";
+    document.getElementById("jobTotal").value = "";
+
+    loadJobs();
+  };
+}
+
+// ---------------- LOAD JOBS ----------------
+function loadJobs() {
+  let tx = db.transaction(["jobs", "clients"], "readonly");
+
+  let jobsStore = tx.objectStore("jobs");
+  let clientsStore = tx.objectStore("clients");
+
+  let req = jobsStore.getAll();
+
+  req.onsuccess = async () => {
+    let jobs = req.result.reverse();
+
+    let html = "";
+
+    for (const job of jobs) {
+      let clientReq = clientsStore.get(job.clientId);
+
+      await new Promise(resolve => {
+        clientReq.onsuccess = () => {
+          const client = clientReq.result;
+
+          html += `
+            <div class="job-card">
+              <b>${job.type}</b><br>
+              Client: ${client ? client.name : "Unknown"}<br>
+              ${job.total} TND<br>
+              Status: ${job.status}
+            </div>
+          `;
+
+          resolve();
+        };
+      });
+    }
+
+    document.getElementById("jobsList").innerHTML = html;
   };
 }
