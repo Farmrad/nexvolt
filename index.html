@@ -1,68 +1,61 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nexvolt</title>
-  <link rel="stylesheet" href="style.css">
-</head>
+<main id="app">
 
-<body onload="initApp()">
+  <!-- DASHBOARD -->
+  <section class="page active" id="dashboardPage">
+    <h2>Dashboard</h2>
 
-  <!-- HEADER -->
-  <header class="topbar">
-    <h1>Nexvolt ⚡</h1>
-  </header>
+    <div class="card">
+      <p>Nexvolt Mobile System ⚡</p>
+    </div>
 
-  <!-- MAIN CONTENT -->
-  <main id="app">
+    <div class="grid">
+      <button onclick="showPage('jobsPage')">Jobs</button>
+      <button onclick="showPage('clientsPage')">Clients</button>
+      <button onclick="showPage('financePage')">Finance</button>
+    </div>
+  </section>
 
-    <!-- DASHBOARD -->
-    <section class="page active" id="dashboardPage">
-      <h2>Dashboard</h2>
+  <!-- JOBS -->
+  <section class="page" id="jobsPage">
+    <h2>Jobs</h2>
 
-      <div class="card">
-        <p>Welcome to Nexvolt System</p>
-      </div>
+    <div class="card">
 
-      <div class="grid">
-        <button onclick="showPage('jobsPage')">Jobs</button>
-        <button onclick="showPage('clientsPage')">Clients</button>
-        <button onclick="showPage('financePage')">Finance</button>
-      </div>
-    </section>
+      <input type="text" id="jobType" placeholder="Job type">
 
-    <!-- JOBS -->
-    <section class="page" id="jobsPage">
-      <h2>Jobs</h2>
+      <input type="number" id="jobTotal" placeholder="Total price">
 
-      <button onclick="openJobForm()">+ New Job</button>
+      <button onclick="saveJob()">Save Job</button>
 
-      <div id="jobsList"></div>
-    </section>
+    </div>
 
-    <!-- CLIENTS -->
-    <section class="page" id="clientsPage">
-      <h2>Clients</h2>
+    <div id="jobsList"></div>
+  </section>
 
-      <button onclick="openClientForm()">+ New Client</button>
+  <!-- CLIENTS -->
+  <section class="page" id="clientsPage">
+    <h2>Clients</h2>
 
-      <div id="clientsList"></div>
-    </section>
+    <div class="card">
 
-    <!-- FINANCE -->
-    <section class="page" id="financePage">
-      <h2>Finance</h2>
+      <input type="text" id="clientName" placeholder="Client name">
 
-      <div class="card">
-        <p>Income / Expenses / Profit coming next</p>
-      </div>
-    </section>
+      <input type="text" id="clientPhone" placeholder="Phone number">
 
-  </main>
+      <button onclick="saveClient()">Save Client</button>
 
-  <script src="db/db.js"></script>
-  <script src="app.js"></script>
+    </div>
 
-</body>
-</html>
+    <div id="clientsList"></div>
+  </section>
+
+  <!-- FINANCE -->
+  <section class="page" id="financePage">
+    <h2>Finance</h2>
+
+    <div class="card">
+      <p>Finance system coming next</p>
+    </div>
+  </section>
+
+</main>
