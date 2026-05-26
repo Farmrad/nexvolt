@@ -1,3 +1,37 @@
-<div>
-  
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Nexvolt</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body onload="initApp()">
+
+  <header>
+    <h1>Nexvolt ⚡</h1>
+    <p>Electrician Business System</p>
+  </header>
+
+  <main>
+
+    <section class="card">
+      <h2>Quick Actions</h2>
+
+      <button onclick="addClient()">➕ New Client</button>
+      <button onclick="addJob()">🛠 New Job</button>
+      <button onclick="addExpense()">💰 Add Expense</button>
+    </section>
+
+    <section class="card">
+      <h2>Jobs</h2>
+      <div id="jobsList"></div>
+    </section>
+
+  </main>
+
+  <script src="db/db.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
