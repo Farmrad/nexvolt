@@ -3,21 +3,13 @@ let db;
 /* INIT */
 function initApp(){
 initDB();
-setTimeout(()=>{
 loadAll();
-renderChart();
-toast("System Ready ⚡");
-},300);
+drawCharts();
 }
 
-/* LOAD */
-function loadAll(){
-loadDashboard();
-loadClients();
-loadClientOptions();
-loadJobs();
-loadExpenses();
-loadInvoices();
+/* MENU */
+function toggleMenu(){
+document.getElementById("sideMenu").classList.toggle("open");
 }
 
 /* NAV */
@@ -26,77 +18,72 @@ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
 document.getElementById(id).classList.add("active");
 }
 
-/* DASHBOARD */
+/* SETTINGS */
+function setTheme(mode){
+if(mode==="dark"){
+document.body.style.background="#0b1220";
+}
+if(mode==="light"){
+document.body.style.background="#f1f5f9";
+document.body.style.color="#000";
+}
+}
+
+function setLang(lang){
+localStorage.setItem("lang",lang);
+alert("Language set: "+lang);
+}
+
+/* DASHBOARD DATA */
 function loadDashboard(){
 
-let tx=db.transaction(["jobs","expenses","invoices"],"readonly");
+let tx=db.transaction(["jobs","expenses"],"readonly");
 
 let j=tx.objectStore("jobs").getAll();
 let e=tx.objectStore("expenses").getAll();
-let i=tx.objectStore("invoices").getAll();
 
 j.onsuccess=()=>{
 e.onsuccess=()=>{
-i.onsuccess=()=>{
 
 let income=j.result.reduce((a,b)=>a+b.total,0);
 let expense=e.result.reduce((a,b)=>a+b.amount,0);
-let unpaid=i.result.filter(x=>!x.paid).reduce((a,b)=>a+b.total,0);
 
-set("income",income);
-set("expense",expense);
-set("profit",income-expense);
-set("unpaid",unpaid);
+incomeEl.innerText=income;
+expenseEl.innerText=expense;
+profitEl.innerText=income-expense;
 
-};
 };
 };
 }
 
-/* SET UI */
-function set(id,val){
-document.getElementById(id).innerText=val+" TND";
-}
+/* CHARTS */
+function drawCharts(){
 
-/* CHART */
-function renderChart(){
-const ctx=document.getElementById("chart");
+const bar=document.getElementById("barChart");
+const pie=document.getElementById("pieChart");
 
-new Chart(ctx,{
-type:"line",
+/* BAR */
+new Chart(bar,{
+type:"bar",
 data:{
-labels:["Mon","Tue","Wed","Thu","Fri","Sat"],
-datasets:[
-{
+labels:["Mon","Tue","Wed","Thu","Fri"],
+datasets:[{
 label:"Income",
-data:[120,200,150,300,250,400],
-borderColor:"#22c55e",
-tension:0.4
-},
-{
-label:"Expenses",
-data:[80,100,90,120,110,150],
-borderColor:"#ef4444",
-tension:0.4
-}
-]
-},
-options:{
-responsive:true,
-plugins:{legend:{labels:{color:"white"}}}
+data:[120,200,150,300,250],
+backgroundColor:"#3b82f6"
+}]
 }
 });
+
+/* PIE */
+new Chart(pie,{
+type:"pie",
+data:{
+labels:["Jobs","Expenses","Profit"],
+datasets:[{
+data:[60,25,15],
+backgroundColor:["#22c55e","#ef4444","#3b82f6"]
+}]
 }
-
-/* TOAST */
-function toast(msg){
-let t=document.getElementById("toast");
-t.innerText=msg;
-t.style.opacity=1;
-t.style.transform="translateY(0)";
-
-setTimeout(()=>{
-t.style.opacity=0;
-t.style.transform="translateY(20px)";
-},2000);
+});
 }
