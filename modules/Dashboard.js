@@ -2,27 +2,23 @@ window.Dashboard = {
   render: function() {
     const s = DB.getStats();
     return `
-      <div class="page">
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div>THIS MONTH</div>
-            <div class="stat-val orange">${s.revenue} TND</div>
-            <div style="font-size:12px; color:var(--text-muted)">Revenue</div>
+      <div class="page" style="padding:20px;">
+        <div class="stats-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+          <div class="stat-card" style="background:#151a23; padding:15px; border-radius:12px; border:1px solid #222;">
+            <div style="font-size:12px; color:#8b949e;">REVENUE</div>
+            <div style="font-size:20px; font-weight:bold; color:#ff9f43; margin-top:5px;">${s.revenue} TND</div>
           </div>
-          <div class="stat-card">
-            <div>UNPAID</div>
-            <div class="stat-val red">${s.unpaid} TND</div>
-            <div style="font-size:12px; color:var(--text-muted)">To collect</div>
+          <div class="stat-card" style="background:#151a23; padding:15px; border-radius:12px; border:1px solid #222;">
+            <div style="font-size:12px; color:#8b949e;">UNPAID</div>
+            <div style="font-size:20px; font-weight:bold; color:#ff4d4d; margin-top:5px;">${s.unpaid} TND</div>
           </div>
-          <div class="stat-card">
-            <div>JOBS</div>
-            <div class="stat-val blue">${s.jobs}</div>
-            <div style="font-size:12px; color:var(--text-muted)">In progress</div>
+          <div class="stat-card" style="background:#151a23; padding:15px; border-radius:12px; border:1px solid #222;">
+            <div style="font-size:12px; color:#8b949e;">JOBS</div>
+            <div style="font-size:20px; font-weight:bold; color:#3498db; margin-top:5px;">${s.jobs}</div>
           </div>
-          <div class="stat-card">
-            <div>CLIENTS</div>
-            <div class="stat-val green">${s.clients}</div>
-            <div style="font-size:12px; color:var(--text-muted)">Total</div>
+          <div class="stat-card" style="background:#151a23; padding:15px; border-radius:12px; border:1px solid #222;">
+            <div style="font-size:12px; color:#8b949e;">CLIENTS</div>
+            <div style="font-size:20px; font-weight:bold; color:#2ecc71; margin-top:5px;">${s.clients}</div>
           </div>
         </div>
       </div>
