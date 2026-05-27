@@ -7,8 +7,26 @@
 
 <title>Electrician OS Pro</title>
 
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f172a">
+
+<!-- ICON (optional but recommended) -->
+<link rel="icon" href="icon.png">
+
+<!-- STYLE -->
 <link rel="stylesheet" href="style.css">
+
+<!-- CHART -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- SERVICE WORKER (PWA OFFLINE) -->
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
+</script>
+
 </head>
 
 <body onload="initApp()">
@@ -20,11 +38,13 @@
 
 <div class="logo">⚡ Nexvolt</div>
 
-<button class="nav" onclick="showPage('dashboard')">Dashboard</button>
-<button class="nav" onclick="showPage('jobs')">Jobs</button>
-<button class="nav" onclick="showPage('clients')">Clients</button>
-<button class="nav" onclick="showPage('expenses')">Expenses</button>
-<button class="nav" onclick="showPage('invoices')">Invoices</button>
+<button onclick="showPage('dashboard')" class="nav">Dashboard</button>
+<button onclick="showPage('jobs')" class="nav">Jobs</button>
+<button onclick="showPage('clients')" class="nav">Clients</button>
+<button onclick="showPage('expenses')" class="nav">Expenses</button>
+<button onclick="showPage('invoices')" class="nav">Invoices</button>
+<button onclick="showPage('cashflow')" class="nav">Cashflow</button>
+<button onclick="showPage('reports')" class="nav">Reports</button>
 
 </div>
 
@@ -35,50 +55,57 @@
 <div id="toast"></div>
 
 <!-- DASHBOARD -->
-<section id="dashboard" class="page active fade">
+<section id="dashboard" class="page active">
 
 <h1 class="title">Dashboard</h1>
 
 <div class="grid">
 
-<div class="card shimmer hover">
+<div class="card">
 <h3>Income</h3>
 <p id="income">0 TND</p>
 </div>
 
-<div class="card shimmer hover">
+<div class="card">
 <h3>Expenses</h3>
 <p id="expense">0 TND</p>
 </div>
 
-<div class="card shimmer hover">
+<div class="card">
 <h3>Profit</h3>
 <p id="profit">0 TND</p>
 </div>
 
-<div class="card shimmer hover">
+<div class="card">
 <h3>Unpaid</h3>
 <p id="unpaid">0 TND</p>
 </div>
 
 </div>
 
-<div class="card chart">
+<div class="card">
 <canvas id="chart"></canvas>
 </div>
 
 </section>
 
 <!-- JOBS -->
-<section id="jobs" class="page fade">
+<section id="jobs" class="page">
 
 <h2>Jobs</h2>
 
-<div class="card form hover">
+<div class="card">
 
 <select id="jobClient"></select>
 <input id="jobType" placeholder="Job type">
 <input id="jobTotal" type="number" placeholder="Price">
+
+<select id="jobStatus">
+<option>pending</option>
+<option>in progress</option>
+<option>waiting contractor</option>
+<option>completed</option>
+</select>
 
 <button onclick="saveJob()">Save Job</button>
 
@@ -89,16 +116,16 @@
 </section>
 
 <!-- CLIENTS -->
-<section id="clients" class="page fade">
+<section id="clients" class="page">
 
 <h2>Clients</h2>
 
-<div class="card form hover">
+<div class="card">
 
 <input id="clientName" placeholder="Name">
 <input id="clientPhone" placeholder="Phone">
 
-<button onclick="saveClient()">Save</button>
+<button onclick="saveClient()">Save Client</button>
 
 </div>
 
@@ -107,16 +134,16 @@
 </section>
 
 <!-- EXPENSES -->
-<section id="expenses" class="page fade">
+<section id="expenses" class="page">
 
 <h2>Expenses</h2>
 
-<div class="card form hover">
+<div class="card">
 
 <input id="expenseCategory" placeholder="Category">
 <input id="expenseAmount" type="number" placeholder="Amount">
 
-<button onclick="saveExpense()">Add</button>
+<button onclick="saveExpense()">Add Expense</button>
 
 </div>
 
@@ -125,16 +152,16 @@
 </section>
 
 <!-- INVOICES -->
-<section id="invoices" class="page fade">
+<section id="invoices" class="page">
 
 <h2>Invoices</h2>
 
-<div class="card form hover">
+<div class="card">
 
 <select id="invoiceJob"></select>
 <input id="tvaRate" type="number" placeholder="TVA %">
 
-<button onclick="createInvoice()">Generate</button>
+<button onclick="createInvoice()">Generate Invoice</button>
 
 </div>
 
@@ -142,9 +169,28 @@
 
 </section>
 
+<!-- CASHFLOW -->
+<section id="cashflow" class="page">
+
+<h2>Cashflow</h2>
+
+<div id="unpaidList"></div>
+
+</section>
+
+<!-- REPORTS -->
+<section id="reports" class="page">
+
+<h2>Reports</h2>
+
+<div id="reportBox"></div>
+
+</section>
+
 </div>
 </div>
 
+<!-- SCRIPTS -->
 <script src="db.js"></script>
 <script src="app.js"></script>
 
