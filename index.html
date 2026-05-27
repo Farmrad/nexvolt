@@ -1,146 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Nexvolt</title>
+<title>Electrician Manager</title>
 
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#111827">
-
-  <link rel="stylesheet" href="style.css">
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 
 <body onload="initApp()">
 
 <header class="topbar">
-  <button onclick="toggleMenu()">☰</button>
-  <h1>Nexvolt ⚡</h1>
-  <button onclick="goBack()">←</button>
+<button onclick="toggleMenu()">☰</button>
+<h1>Electrician App</h1>
+<button onclick="goBack()">←</button>
 </header>
 
 <div id="sideMenu" class="side-menu">
-  <button onclick="showPage('dashboardPage')">Dashboard</button>
-  <button onclick="showPage('jobsPage')">Jobs</button>
-  <button onclick="showPage('clientsPage')">Clients</button>
-  <button onclick="showPage('financePage')">Expenses</button>
-  <button onclick="showPage('invoicesPage')">Invoices</button>
-  <button onclick="showPage('settingsPage')">Settings</button>
 
-  <hr>
+<button onclick="showPage('dashboard')">Dashboard</button>
+<button onclick="showPage('jobs')">Jobs</button>
+<button onclick="showPage('clients')">Clients</button>
+<button onclick="showPage('expenses')">Expenses</button>
+<button onclick="showPage('invoices')">Invoices</button>
+<button onclick="showPage('cashflow')">Cashflow</button>
 
-  <button onclick="exportBackup()">Export Backup</button>
-  <input type="file" onchange="importBackup(event)">
+<hr>
+
+<button onclick="exportBackup()">Export Backup</button>
+<input type="file" onchange="importBackup(event)">
 </div>
 
 <main>
 
 <!-- DASHBOARD -->
-<section class="page active" id="dashboardPage">
-  <h2>Dashboard</h2>
+<section id="dashboard" class="page active">
+<h2>Dashboard</h2>
 
-  <div class="stats-grid">
-    <div class="stat-card"><h3 id="totalIncome">0</h3><p>Income</p></div>
-    <div class="stat-card"><h3 id="totalExpenses">0</h3><p>Expenses</p></div>
-    <div class="stat-card"><h3 id="profit">0</h3><p>Profit</p></div>
-    <div class="stat-card"><h3 id="totalJobs">0</h3><p>Jobs</p></div>
-  </div>
+<div class="stats-grid">
+<div class="card"><h3 id="income">0</h3><p>Income</p></div>
+<div class="card"><h3 id="expense">0</h3><p>Expenses</p></div>
+<div class="card"><h3 id="profit">0</h3><p>Profit</p></div>
+<div class="card"><h3 id="unpaid">0</h3><p>Unpaid</p></div>
+</div>
 </section>
 
 <!-- JOBS -->
-<section class="page" id="jobsPage">
-  <h2>Jobs</h2>
+<section id="jobs" class="page">
+<h2>Jobs</h2>
 
-  <div class="card">
-    <select id="jobClient"></select>
-    <input id="jobType" placeholder="Job type">
-    <input id="jobTotal" type="number" placeholder="Price">
-    <select id="jobStatus">
-      <option>active</option>
-      <option>completed</option>
-      <option>pending</option>
-    </select>
+<div class="card">
+<select id="jobClient"></select>
+<input id="jobType" placeholder="Type">
+<input id="jobTotal" type="number" placeholder="Price">
+<button onclick="saveJob()">Save Job</button>
+</div>
 
-    <button onclick="saveJob()">Save Job</button>
-  </div>
-
-  <!-- PHOTOS -->
-  <div class="card">
-    <h3>Photos</h3>
-    <input type="file" id="jobPhoto" accept="image/*" capture="environment">
-    <button onclick="addJobPhoto()">Add Photo</button>
-    <div id="photoPreview"></div>
-  </div>
-
-  <!-- SIGNATURE -->
-  <div class="card">
-    <h3>Signature</h3>
-    <canvas id="signaturePad" width="300" height="150"></canvas>
-    <button onclick="saveSignature()">Save Signature</button>
-    <button onclick="clearSignature()">Clear</button>
-  </div>
-
-  <div id="jobsList"></div>
+<div id="jobsList"></div>
 </section>
 
 <!-- CLIENTS -->
-<section class="page" id="clientsPage">
-  <h2>Clients</h2>
+<section id="clients" class="page">
+<h2>Clients</h2>
 
-  <div class="card">
-    <input id="clientName" placeholder="Name">
-    <input id="clientPhone" placeholder="Phone">
-    <button onclick="saveClient()">Save Client</button>
-  </div>
+<div class="card">
+<input id="clientName" placeholder="Name">
+<input id="clientPhone" placeholder="Phone">
+<button onclick="saveClient()">Save</button>
+</div>
 
-  <div id="clientsList"></div>
+<div id="clientsList"></div>
 </section>
 
 <!-- EXPENSES -->
-<section class="page" id="financePage">
-  <h2>Expenses</h2>
+<section id="expenses" class="page">
+<h2>Expenses</h2>
 
-  <div class="card">
-    <input id="expenseCategory" placeholder="Category">
-    <input id="expenseAmount" type="number" placeholder="Amount">
-    <button onclick="saveExpense()">Add Expense</button>
-  </div>
+<div class="card">
+<input id="expenseCategory" placeholder="Category">
+<input id="expenseAmount" type="number" placeholder="Amount">
+<button onclick="saveExpense()">Add</button>
+</div>
 
-  <div id="expensesList"></div>
+<div id="expensesList"></div>
 </section>
 
 <!-- INVOICES -->
-<section class="page" id="invoicesPage">
-  <h2>Invoices</h2>
+<section id="invoices" class="page">
+<h2>Invoices</h2>
 
-  <div class="card">
-    <select id="invoiceJob"></select>
-    <input id="tvaRate" type="number" placeholder="TVA %">
-    <button onclick="createInvoice()">Generate Invoice</button>
-  </div>
+<div class="card">
+<select id="invoiceJob"></select>
+<input id="tvaRate" type="number" placeholder="TVA %">
+<button onclick="createInvoice()">Generate</button>
+</div>
 
-  <div id="invoiceList"></div>
+<div id="invoiceList"></div>
 </section>
 
-<!-- SETTINGS -->
-<section class="page" id="settingsPage">
-  <h2>Settings</h2>
+<!-- CASHFLOW -->
+<section id="cashflow" class="page">
+<h2>Cashflow</h2>
 
-  <div class="card">
-    <input id="businessName" placeholder="Business Name">
-    <input id="businessPhone" placeholder="Phone">
-    <input id="businessCity" placeholder="City">
-    <button onclick="saveSettings()">Save Settings</button>
-  </div>
+<div id="unpaidList"></div>
 </section>
 
 </main>
 
-<script src="db/db.js"></script>
+<script src="db.js"></script>
 <script src="app.js"></script>
 
 </body>
