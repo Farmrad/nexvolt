@@ -1,56 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Electrician OS Pro</title>
-
+<title>Electrician ERP Pro</title>
 <link rel="stylesheet" href="style.css">
-
 </head>
 
-<body onload="initApp()">
+<body>
 
-<!-- TOP BAR -->
-<header class="topbar">
+<!-- APP ROOT -->
+<div id="app"></div>
 
-<div class="menu-btn" onclick="toggleMenu()">☰</div>
+<!-- CORE -->
+<script src="core/db.js"></script>
+<script src="core/state.js"></script>
+<script src="core/router.js"></script>
 
-<h1>⚡ NEXVOLT</h1>
+<!-- MODULES -->
+<script src="modules/clients.js"></script>
+<script src="modules/jobs.js"></script>
+<script src="modules/expenses.js"></script>
+<script src="modules/invoices.js"></script>
+<script src="modules/analytics.js"></script>
 
-</header>
-
-<!-- SIDE MENU -->
-<div id="sideMenu" class="side-menu">
-
-<button onclick="loadPage('dashboard'); toggleMenu()">🏠 Dashboard</button>
-<button onclick="loadPage('clients'); toggleMenu()">👤 Clients</button>
-<button onclick="loadPage('jobs'); toggleMenu()">🔧 Jobs</button>
-<button onclick="loadPage('expenses'); toggleMenu()">💸 Expenses</button>
-<button onclick="loadPage('invoices'); toggleMenu()">🧾 Invoices</button>
-
-</div>
-
-<!-- OVERLAY -->
-<div id="overlay" onclick="toggleMenu()"></div>
-
-<!-- MAIN CONTENT -->
-<main id="content"></main>
-
-<!-- BOTTOM NAV -->
-<nav class="bottom-nav">
-
-<button onclick="loadPage('dashboard')">🏠</button>
-<button onclick="loadPage('clients')">👤</button>
-<button onclick="loadPage('expenses')">💸</button>
-<button onclick="loadPage('invoices')">🧾</button>
-
-</nav>
-
-<!-- APP -->
-<script src="app.js"></script>
+<script>
+navigate("dashboard");
+</script>
 
 </body>
 </html>
