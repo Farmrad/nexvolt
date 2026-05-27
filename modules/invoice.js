@@ -1,87 +1,52 @@
 window.InvoicesPage = (() => {
   function render() {
     const app = document.getElementById('app');
-    const invoices = DB.getAll('invoices').sort((a, b) => b.createdAt - a.createdAt);
-
-    let html = `
-      <div class="page">
-        <div class="section-hdr">
-          <div class="section-title">Factures</div>
-          <button class="btn btn-primary btn-sm" onclick="InvoicesPage.openForm()">+ Facture</button>
+    const invs = DB.getAll('invoices');
+    
+    let html = `<div class="page"><h3>Factures</h3><button onclick="InvoicesPage.openForm()">+ Nouvelle Facture</button>`;
+    invs.forEach(i => {
+      html += `<div class="item">
+        <div><strong>${i.clientName}</strong><br>N° ${i.invoiceNo} | ${i.date}</div>
+        <div>${i.ttc.toFixed(3)} DT<br>
+             <button onclick="InvoicesPage.exportPDF('${i.id}')">PDF</button>
+             <button onclick="InvoicesPage.exportExcel('${i.id}')">Excel</button>
         </div>
-    `;
-
-    if (invoices.length === 0) {
-      html += `<div class="empty">Aucune facture.</div>`;
-    } else {
-      invoices.forEach(i => {
-        html += `
-          <div class="item">
-            <div class="item-icon">📄</div>
-            <div class="item-body">
-              <div class="item-name">${i.clientName}</div>
-              <div class="item-sub">${i.invoiceNo} • ${i.date}</div>
-            </div>
-            <div class="item-right">
-              <div class="item-amount">${i.ttc.toFixed(3)} DT</div>
-              <div class="status ${i.status}">${i.status}</div>
-            </div>
-          </div>
-        `;
-      });
-    }
-
-    html += `</div>`;
-    app.innerHTML = html;
-  }
-
-  function openForm() {
-    const modal = document.getElementById('modal-root');
-    modal.innerHTML = `
-      <div class="modal-overlay open">
-        <div class="modal">
-          <div class="modal-hdr">
-            <div class="modal-title">Nouvelle Facture</div>
-            <button class="modal-close" onclick="InvoicesPage.closeForm()">Fermer</button>
-          </div>
-          <div class="form-group">
-            <input type="text" id="inv-client" class="form-input" placeholder="Nom du Client">
-          </div>
-          <div class="form-group">
-            <input type="number" id="inv-amount" class="form-input" placeholder="Montant HT">
-          </div>
-          <button class="btn btn-primary btn-full" onclick="InvoicesPage.saveInvoice()">Enregistrer</button>
-        </div>
-      </div>
-    `;
+      </div>`;
+    });
+    app.innerHTML = html + `</div>`;
   }
 
   function saveInvoice() {
+    // Logic to handle multiple items
     const clientName = document.getElementById('inv-client').value;
-    const amountHT = parseFloat(document.getElementById('inv-amount').value);
+    const items = JSON.parse(document.getElementById('inv-items').value); // Expecting [{desc, qte, pu}]
     
-    if (!clientName || !amountHT) return alert("Remplissez tout svp.");
+    let totalHT = items.reduce((sum, item) => sum + (item.qte * item.pu), 0);
+    let tva = totalHT * 0.19;
+    let ttc = totalHT + tva + 1.000; // 1DT Timbre
 
-    const tva = amountHT * 0.19;
-    const ttc = amountHT + tva + 1; // +1 DT Timbre
-
-    DB.insert('invoices', {
-      invoiceNo: DB.nextInvoiceNumber(),
-      clientName,
-      ht: amountHT,
-      ttc,
-      status: 'en attente',
-      date: new Date().toLocaleDateString()
-    });
-
-    DB.incrementInvoiceNumber();
-    closeForm();
+    DB.insert('invoices', { clientName, items, totalHT, tva, ttc, invoiceNo: 'F-' + Date.now().toString().slice(-4), date: new Date().toLocaleDateString() });
     render();
   }
 
-  function closeForm() {
-    document.getElementById('modal-root').innerHTML = '';
+  function exportPDF(id) {
+    const inv = DB.getAll('invoices').find(i => i.id === id);
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    doc.text("FACTURE", 20, 20);
+    doc.text(`Client: ${inv.clientName}`, 20, 30);
+    doc.text(`Total TTC: ${inv.ttc.toFixed(3)} DT`, 20, 40);
+    doc.save(`Facture_${inv.invoiceNo}.pdf`);
   }
 
-  return { render, openForm, closeForm, saveInvoice };
+  function exportExcel(id) {
+    const inv = DB.getAll('invoices').find(i => i.id === id);
+    const ws = XLSX.utils.json_to_sheet(inv.items);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Facture");
+    XLSX.writeFile(wb, `Facture_${inv.invoiceNo}.xlsx`);
+  }
+
+  return { render, saveInvoice, exportPDF, exportExcel };
 })();
