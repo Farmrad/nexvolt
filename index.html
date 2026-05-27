@@ -1,54 +1,11 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#0a0e17" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <title>Nexvolt ⚡</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
+<script src="db/db.js"></script>
+<script src="db/router.js"></script>
 
-  <header class="topbar">
-    <div>
-      <div class="logo">NEX<span>VOLT</span></div>
-      <div class="topbar-sub" id="topbar-date"></div>
-    </div>
-  </header>
+<script src="modules/dashboard.js"></script>
+<script src="modules/clients.js"></script>
+<script src="modules/settings.js"></script>
 
-  <main id="app"></main>
-
-  <nav class="bottom-nav">
-    <button class="nav-btn active" data-page="dashboard" onclick="Router.go('dashboard')">
-      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      <span>Accueil</span>
-    </button>
-    <button class="nav-btn" data-page="invoices" onclick="Router.go('invoices')">
-      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-      <span>Factures</span>
-    </button>
-    <button class="nav-btn" data-page="clients" onclick="Router.go('clients')">
-      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      <span>Clients</span>
-    </button>
-    <button class="nav-btn" data-page="expenses" onclick="Router.go('expenses')">
-      <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-      <span>Dépenses</span>
-    </button>
-  </nav>
-
-  <div id="modal-root"></div>
-
-  <script src="db/db.js"></script>
-  <script src="db/router.js"></script>
-  
-  <script src="modules/dashboard.js"></script>
-  <script src="modules/clients.js"></script>
-  <script src="modules/invoice.js"></script>
-  <script src="modules/expenses.js"></script>
-  <script src="modules/job.js"></script>
-  
-  <script src="app.js"></script>
-</body>
-</html>
+<script>
+  DB.init();
+  Router.go('Dashboard'); // Initial load
+</script>
