@@ -1,11 +1,198 @@
-/* =========================================
+/* =====================================
    ELECTRICIAN OS PRO
-   MODERN INVOICE ENGINE
-========================================= */
+   INVOICE AUTOMATION SYSTEM
+===================================== */
 
-let invoiceCounter = localStorage.getItem("invoiceCounter") || 1;
+let invoiceCounter =
+Number(localStorage.getItem("invoiceCounter")) || 1;
 
-/* GENERATE PDF */
+/* LOAD CLIENTS INTO INVOICE */
+function loadInvoiceClients(){
+
+const clients =
+JSON.parse(localStorage.getItem("clients")) || [];
+
+const select =
+document.getElementById("invoiceClient");
+
+if(!select) return;
+
+select.innerHTML =
+'<option value="">Select Client</option>';
+
+clients.forEach((client,index)=>{
+
+select.innerHTML += `
+
+<option value="${index}">
+${client.name}
+</option>
+
+`;
+
+});
+
+}
+
+/* LOAD JOBS */
+function loadInvoiceJobs(){
+
+const jobs =
+JSON.parse(localStorage.getItem("jobs")) || [];
+
+const select =
+document.getElementById("invoiceJob");
+
+if(!select) return;
+
+select.innerHTML =
+'<option value="">Select Job</option>';
+
+jobs.forEach((job,index)=>{
+
+select.innerHTML += `
+
+<option value="${index}">
+${job.type} - ${job.total} TND
+</option>
+
+`;
+
+});
+
+}
+
+/* GENERATE SELECTED INVOICE */
+function generateSelectedInvoice(){
+
+const clients =
+JSON.parse(localStorage.getItem("clients")) || [];
+
+const jobs =
+JSON.parse(localStorage.getItem("jobs")) || [];
+
+const clientIndex =
+document.getElementById("invoiceClient").value;
+
+const jobIndex =
+document.getElementById("invoiceJob").value;
+
+if(clientIndex===""){
+alert("Select client");
+return;
+}
+
+if(jobIndex===""){
+alert("Select job");
+return;
+}
+
+const client =
+clients[clientIndex];
+
+const job =
+jobs[jobIndex];
+
+generateModernInvoice({
+
+client: client.name,
+
+clientMF:
+client.mf || "",
+
+items:[
+
+{
+description: job.type,
+qty:1,
+price:Number(job.total)
+}
+
+]
+
+});
+
+/* SAVE HISTORY */
+saveInvoiceHistory(client,job);
+
+}
+
+/* SAVE HISTORY */
+function saveInvoiceHistory(client,job){
+
+const history =
+JSON.parse(localStorage.getItem("invoiceHistory")) || [];
+
+const invoiceNumber =
+invoiceCounter + "-" + new Date().getFullYear();
+
+history.push({
+
+number: invoiceNumber,
+client: client.name,
+job: job.type,
+amount: job.total,
+date: new Date().toLocaleDateString()
+
+});
+
+localStorage.setItem(
+"invoiceHistory",
+JSON.stringify(history)
+);
+
+loadInvoiceHistory();
+
+}
+
+/* LOAD HISTORY */
+function loadInvoiceHistory(){
+
+const history =
+JSON.parse(localStorage.getItem("invoiceHistory")) || [];
+
+const container =
+document.getElementById("invoiceHistory");
+
+if(!container) return;
+
+container.innerHTML = "";
+
+history.reverse().forEach(invoice=>{
+
+container.innerHTML += `
+
+<div class="invoice-item">
+
+<h4>
+Facture ${invoice.number}
+</h4>
+
+<p>
+${invoice.client}
+</p>
+
+<p>
+${invoice.job}
+</p>
+
+<p>
+${invoice.amount} TND
+</p>
+
+<p>
+${invoice.date}
+</p>
+
+</div>
+
+`;
+
+});
+
+}
+
+/* MAIN PDF ENGINE */
 function generateModernInvoice(data){
 
 const { jsPDF } = window.jspdf;
@@ -17,64 +204,121 @@ const dark = [15,23,42];
 const blue = [37,99,235];
 const gray = [100,116,139];
 
-/* HEADER BG */
+/* HEADER */
 doc.setFillColor(...dark);
+
 doc.rect(0,0,210,40,"F");
 
-/* LOGO / TITLE */
+/* TITLE */
 doc.setTextColor(255,255,255);
+
 doc.setFontSize(24);
+
 doc.text("⚡ NEXVOLT",15,20);
 
 doc.setFontSize(11);
-doc.text("Travaux Electricité Bâtiment",15,30);
+
+doc.text(
+"Travaux Electricité Bâtiment",
+15,
+30
+);
 
 /* COMPANY INFO */
 doc.setTextColor(...gray);
 
 doc.setFontSize(10);
 
-doc.text("Mohamed Salim Mrad",15,50);
-doc.text("Akouda, Sousse",15,56);
-doc.text("MF: 1860282/TAC/000",15,62);
-doc.text("GSM: 56 130 571",15,68);
-doc.text("Email: mohamedsalimmrad@gmail.com",15,74);
+doc.text(
+"Mohamed Salim Mrad",
+15,
+50
+);
 
-/* INVOICE INFO */
+doc.text(
+"Akouda, Sousse",
+15,
+56
+);
+
+doc.text(
+"MF: 1860282/TAC/000",
+15,
+62
+);
+
+doc.text(
+"GSM: 56 130 571",
+15,
+68
+);
+
+doc.text(
+"mohamedsalimmrad@gmail.com",
+15,
+74
+);
+
+/* FACTURE INFO */
 doc.setTextColor(...dark);
 
 doc.setFontSize(18);
+
 doc.text("FACTURE",150,50);
+
+const invoiceNumber =
+invoiceCounter + "-" +
+new Date().getFullYear();
 
 doc.setFontSize(11);
 
-const invoiceNumber =
-invoiceCounter + "-" + new Date().getFullYear();
+doc.text(
+"Facture N°: " + invoiceNumber,
+150,
+60
+);
 
-doc.text("Facture N°: " + invoiceNumber,150,60);
-
-const today = new Date().toLocaleDateString();
-
-doc.text("Date: " + today,150,68);
+doc.text(
+"Date: " +
+new Date().toLocaleDateString(),
+150,
+68
+);
 
 /* CLIENT BOX */
 doc.setFillColor(245,247,250);
-doc.roundedRect(15,85,180,30,4,4,"F");
+
+doc.roundedRect(
+15,
+85,
+180,
+30,
+4,
+4,
+"F"
+);
 
 doc.setTextColor(...dark);
 
 doc.setFontSize(12);
+
 doc.text("Client",20,95);
 
 doc.setFontSize(11);
 
-doc.text(data.client,20,104);
+doc.text(data.client,20,105);
 
 if(data.clientMF){
-doc.text("MF: " + data.clientMF,20,111);
+
+doc.text(
+"MF: " + data.clientMF,
+20,
+112
+);
+
 }
 
-/* TABLE HEADER */
+/* TABLE */
 doc.setFillColor(...blue);
 
 doc.rect(15,130,180,10,"F");
@@ -86,7 +330,7 @@ doc.text("Qte",110,137);
 doc.text("PU HT",135,137);
 doc.text("Montant",170,137);
 
-/* TABLE BODY */
+/* BODY */
 doc.setTextColor(...dark);
 
 let y = 150;
@@ -94,42 +338,105 @@ let y = 150;
 data.items.forEach(item=>{
 
 doc.text(item.description,20,y);
-doc.text(String(item.qty),112,y);
-doc.text(item.price.toFixed(3),135,y);
-doc.text((item.qty * item.price).toFixed(3),170,y);
+
+doc.text(
+String(item.qty),
+112,
+y
+);
+
+doc.text(
+item.price.toFixed(3),
+135,
+y
+);
+
+doc.text(
+(item.qty * item.price).toFixed(3),
+170,
+y
+);
 
 y += 10;
 
 });
 
 /* TOTALS */
-const totalHT = data.items.reduce((a,b)=>
+const totalHT =
+data.items.reduce((a,b)=>
 a + (b.qty * b.price),0);
 
 const tva = totalHT * 0.19;
 
 const timbre = 1;
 
-const totalTTC = totalHT + tva + timbre;
+const totalTTC =
+totalHT + tva + timbre;
 
 /* TOTAL BOX */
 doc.setFillColor(248,250,252);
 
-doc.roundedRect(120,y+10,75,40,4,4,"F");
+doc.roundedRect(
+120,
+y+10,
+75,
+40,
+4,
+4,
+"F"
+);
 
-doc.text("HT:",130,y+20);
-doc.text(totalHT.toFixed(3) + " TND",165,y+20);
+doc.setTextColor(...dark);
 
-doc.text("TVA 19%:",130,y+28);
-doc.text(tva.toFixed(3) + " TND",165,y+28);
+doc.text(
+"HT:",
+130,
+y+20
+);
 
-doc.text("Timbre:",130,y+36);
-doc.text("1.000 TND",165,y+36);
+doc.text(
+totalHT.toFixed(3) + " TND",
+160,
+y+20
+);
+
+doc.text(
+"TVA 19%:",
+130,
+y+28
+);
+
+doc.text(
+tva.toFixed(3) + " TND",
+160,
+y+28
+);
+
+doc.text(
+"Timbre:",
+130,
+y+36
+);
+
+doc.text(
+"1.000 TND",
+160,
+y+36
+);
 
 doc.setFontSize(13);
 
-doc.text("TTC:",130,y+48);
-doc.text(totalTTC.toFixed(3) + " TND",165,y+48);
+doc.text(
+"TTC:",
+130,
+y+48
+);
+
+doc.text(
+totalTTC.toFixed(3) + " TND",
+160,
+y+48
+);
 
 /* FOOTER */
 doc.setFontSize(9);
@@ -143,7 +450,11 @@ doc.text(
 );
 
 /* SAVE */
-doc.save("Facture-" + invoiceNumber + ".pdf");
+doc.save(
+"Facture-" +
+invoiceNumber +
+".pdf"
+);
 
 /* UPDATE COUNTER */
 invoiceCounter++;
@@ -155,36 +466,13 @@ invoiceCounter
 
 }
 
-/* TEST FUNCTION */
-function testInvoice(){
+/* INIT INVOICE PAGE */
+function initInvoicePage(){
 
-generateModernInvoice({
+loadInvoiceClients();
 
-client:"Comptoir Moderne",
-clientMF:"160571XBM000",
+loadInvoiceJobs();
 
-items:[
-
-{
-description:"Installation électrique",
-qty:1,
-price:350
-},
-
-{
-description:"Coffret 12V",
-qty:1,
-price:250
-},
-
-{
-description:"Panneau Cat6",
-qty:1,
-price:140
-}
-
-]
-
-});
+loadInvoiceHistory();
 
 }
