@@ -1,16 +1,30 @@
 window.Dashboard = {
-  render: () => {
+  render: function() {
     const s = DB.getStats();
     return `
       <div class="page">
-        <h3>Analytics</h3>
         <div class="stats-grid">
-          <div class="stat-card">Revenu: ${s.revenue} TND</div>
-          <div class="stat-card">Dépenses: ${s.expenses} TND</div>
-          <div class="stat-card">Chantiers: ${s.jobs}</div>
-          <div class="stat-card">Clients: ${s.clients}</div>
+          <div class="stat-card">
+            <div>THIS MONTH</div>
+            <div class="stat-val orange">${s.revenue} TND</div>
+            <div style="font-size:12px; color:var(--text-muted)">Revenue</div>
+          </div>
+          <div class="stat-card">
+            <div>UNPAID</div>
+            <div class="stat-val red">${s.unpaid} TND</div>
+            <div style="font-size:12px; color:var(--text-muted)">To collect</div>
+          </div>
+          <div class="stat-card">
+            <div>JOBS</div>
+            <div class="stat-val blue">${s.jobs}</div>
+            <div style="font-size:12px; color:var(--text-muted)">In progress</div>
+          </div>
+          <div class="stat-card">
+            <div>CLIENTS</div>
+            <div class="stat-val green">${s.clients}</div>
+            <div style="font-size:12px; color:var(--text-muted)">Total</div>
+          </div>
         </div>
-        <button onclick="DB.exportData()">Backup Data (Copy to Clipboard)</button>
       </div>
     `;
   }
