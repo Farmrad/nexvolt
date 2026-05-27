@@ -20,16 +20,19 @@
 
 <div class="logo">⚡ Nexvolt</div>
 
-<button class="nav-btn" onclick="showPage('dashboard')">Dashboard</button>
-<button class="nav-btn" onclick="showPage('jobs')">Jobs</button>
-<button class="nav-btn" onclick="showPage('clients')">Clients</button>
-<button class="nav-btn" onclick="showPage('expenses')">Expenses</button>
-<button class="nav-btn" onclick="showPage('invoices')">Invoices</button>
+<button class="nav" onclick="showPage('dashboard')">Dashboard</button>
+<button class="nav" onclick="showPage('jobs')">Jobs</button>
+<button class="nav" onclick="showPage('clients')">Clients</button>
+<button class="nav" onclick="showPage('expenses')">Expenses</button>
+<button class="nav" onclick="showPage('invoices')">Invoices</button>
 
 </div>
 
 <!-- MAIN -->
 <div class="main">
+
+<!-- TOAST -->
+<div id="toast"></div>
 
 <!-- DASHBOARD -->
 <section id="dashboard" class="page active fade">
@@ -38,29 +41,29 @@
 
 <div class="grid">
 
-<div class="card glass hover-up green">
+<div class="card shimmer hover">
 <h3>Income</h3>
 <p id="income">0 TND</p>
 </div>
 
-<div class="card glass hover-up red">
+<div class="card shimmer hover">
 <h3>Expenses</h3>
 <p id="expense">0 TND</p>
 </div>
 
-<div class="card glass hover-up blue">
+<div class="card shimmer hover">
 <h3>Profit</h3>
 <p id="profit">0 TND</p>
 </div>
 
-<div class="card glass hover-up dark">
+<div class="card shimmer hover">
 <h3>Unpaid</h3>
 <p id="unpaid">0 TND</p>
 </div>
 
 </div>
 
-<div class="card chart-card hover-up">
+<div class="card chart">
 <canvas id="chart"></canvas>
 </div>
 
@@ -71,11 +74,14 @@
 
 <h2>Jobs</h2>
 
-<div class="card glass hover-up">
+<div class="card form hover">
+
 <select id="jobClient"></select>
 <input id="jobType" placeholder="Job type">
 <input id="jobTotal" type="number" placeholder="Price">
-<button class="btn" onclick="saveJob()">Save Job</button>
+
+<button onclick="saveJob()">Save Job</button>
+
 </div>
 
 <div id="jobsList"></div>
@@ -87,10 +93,13 @@
 
 <h2>Clients</h2>
 
-<div class="card glass hover-up">
+<div class="card form hover">
+
 <input id="clientName" placeholder="Name">
 <input id="clientPhone" placeholder="Phone">
-<button class="btn" onclick="saveClient()">Save</button>
+
+<button onclick="saveClient()">Save</button>
+
 </div>
 
 <div id="clientsList"></div>
@@ -102,10 +111,13 @@
 
 <h2>Expenses</h2>
 
-<div class="card glass hover-up">
+<div class="card form hover">
+
 <input id="expenseCategory" placeholder="Category">
 <input id="expenseAmount" type="number" placeholder="Amount">
-<button class="btn" onclick="saveExpense()">Add</button>
+
+<button onclick="saveExpense()">Add</button>
+
 </div>
 
 <div id="expensesList"></div>
@@ -117,10 +129,13 @@
 
 <h2>Invoices</h2>
 
-<div class="card glass hover-up">
+<div class="card form hover">
+
 <select id="invoiceJob"></select>
 <input id="tvaRate" type="number" placeholder="TVA %">
-<button class="btn" onclick="createInvoice()">Generate</button>
+
+<button onclick="createInvoice()">Generate</button>
+
 </div>
 
 <div id="invoiceList"></div>
