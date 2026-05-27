@@ -1,46 +1,30 @@
 window.DB = (() => {
-  const STORE = 'nexvolt_v1';
-  
-  // Data cache
-  let _cache = {
-    clients: [],
-    invoices: [],
-    expenses: [],
-    jobs: [],
-    settings: { company: 'Nexvolt', phone: '56 130 571' }
-  };
+  const STORE = 'nexvolt_data';
+  let _state = { clients: [], invoices: [], expenses: [], jobs: [], settings: {} };
 
   function init() {
-    ['clients', 'invoices', 'expenses', 'jobs', 'settings'].forEach(key => {
-      const data = localStorage.getItem(STORE + '_' + key);
-      if (data) _cache[key] = JSON.parse(data);
-    });
+    const saved = localStorage.getItem(STORE);
+    if (saved) _state = JSON.parse(saved);
   }
 
   function save() {
-    for (let key in _cache) {
-      localStorage.setItem(STORE + '_' + key, JSON.stringify(_cache[key]));
-    }
+    localStorage.setItem(STORE, JSON.stringify(_state));
   }
 
-  function insert(coll, data) {
-    data.id = Date.now().toString();
-    _cache[coll].push(data);
-    save();
-  }
-
-  function getAll(coll) { return _cache[coll]; }
+  // Backup & Restore
+  const exportData = () => JSON.stringify(_state);
+  const importData = (json) => { _state = JSON.parse(json); save(); };
 
   function getStats() {
-    const revenue = _cache.invoices.filter(i => i.status === 'payée').reduce((a, b) => a + b.ttc, 0);
-    const expenses = _cache.expenses.reduce((a, b) => a + b.amount, 0);
+    const revenue = _state.invoices.filter(i => i.status === 'payée').reduce((a, b) => a + (Number(b.ttc) || 0), 0);
+    const expenses = _state.expenses.reduce((a, b) => a + (Number(b.amount) || 0), 0);
     return {
-      revenue,
-      expenses,
-      jobs: _cache.jobs.filter(j => j.status !== 'Terminé').length,
-      clients: _cache.clients.length
+      revenue: revenue.toFixed(3),
+      expenses: expenses.toFixed(3),
+      jobs: _state.jobs.filter(j => j.status !== 'Terminé').length,
+      clients: _state.clients.length
     };
   }
 
-  return { init, insert, getAll, getStats };
+  return { init, state: _state, save, exportData, importData, getStats };
 })();
