@@ -27,9 +27,7 @@ function toggleMenu() {
 function showPage(id) {
   const current = document.querySelector(".page.active");
 
-  if (current) {
-    historyStack.push(current.id);
-  }
+  if (current) historyStack.push(current.id);
 
   document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
   document.getElementById(id).classList.add("active");
@@ -60,7 +58,6 @@ function saveSettings() {
 
 function loadSettings() {
   const settings = JSON.parse(localStorage.getItem("nexvolt_settings"));
-
   if (!settings) return;
 
   businessName.value = settings.businessName || "";
@@ -165,9 +162,9 @@ function loadJobs() {
 
     for (let j of jobsReq.result.slice().reverse()) {
 
-      let c = await new Promise(resolve => {
-        let req = clientsStore.get(j.clientId);
-        req.onsuccess = () => resolve(req.result);
+      let c = await new Promise(res => {
+        let r = clientsStore.get(j.clientId);
+        r.onsuccess = () => res(r.result);
       });
 
       html += `
@@ -228,7 +225,7 @@ function loadExpenses() {
   };
 }
 
-/* ================= INVOICES (FRENCH FACTURE) ================= */
+/* ================= INVOICES ================= */
 
 function createInvoice() {
 
@@ -258,22 +255,20 @@ function createInvoice() {
       let number = String(invoiceCounter).padStart(4, "0");
 
       invoiceStore.add({
-        number: number,
+        number,
         clientName: client?.name || "Client inconnu",
         clientPhone: client?.phone || "",
         jobType: job.type,
         subtotal: job.total,
-        tva: tva,
-        tvaAmount: tvaAmount,
+        tva,
+        tvaAmount,
         total: totalTTC,
         date: new Date().toLocaleDateString("fr-FR")
       });
 
       invoiceCounter++;
 
-      tx.oncomplete = () => {
-        loadInvoices();
-      };
+      tx.oncomplete = () => loadInvoices();
     };
   };
 }
@@ -282,10 +277,10 @@ function deleteInvoice(id) {
   let tx = db.transaction("invoices", "readwrite");
   tx.objectStore("invoices").delete(id);
 
-  tx.oncomplete = () => {
-    loadInvoices();
-  };
+  tx.oncomplete = () => loadInvoices();
 }
+
+/* ================= LOAD INVOICES ================= */
 
 function loadInvoices() {
   let tx = db.transaction("invoices", "readonly");
@@ -298,7 +293,7 @@ function loadInvoices() {
       .reverse()
       .map(i => `
 
-<div class="job-card" style="padding:15px">
+<div class="job-card">
 
 <h3>FACTURE N° ${i.number}</h3>
 
@@ -326,8 +321,10 @@ GSM: 56130571<br>
 
 <hr>
 
-<strong>Date :</strong> ${i.date}
+<strong>Date :</strong> ${i.date}<br>
 
+<button onclick="downloadPDF('${i.number}')">PDF</button>
+<button onclick="sendWhatsApp('${i.number}')">WhatsApp</button>
 <button onclick="deleteInvoice(${i.id})">Delete</button>
 
 </div>
@@ -336,9 +333,64 @@ GSM: 56130571<br>
   };
 }
 
+/* ================= PDF ================= */
+
+function downloadPDF(number) {
+
+  let tx = db.transaction("invoices", "readonly");
+  let req = tx.objectStore("invoices").getAll();
+
+  req.onsuccess = () => {
+
+    let i = req.result.find(x => x.number == number);
+
+    const { jsPDF } = window.jspdf;
+    let doc = new jsPDF();
+
+    doc.text("FACTURE", 90, 10);
+
+    doc.text("Mohamed Salim Mrad", 10, 20);
+    doc.text("TRAVAUX ELECTRICITE BATIMENT", 10, 25);
+    doc.text("M.F: 1860282/TAC/000", 10, 30);
+    doc.text("GSM: 56130571", 10, 35);
+
+    doc.text("Client: " + i.clientName, 10, 50);
+    doc.text("Travaux: " + i.jobType, 10, 55);
+    doc.text("Total TTC: " + i.total + " TND", 10, 65);
+    doc.text("Date: " + i.date, 10, 75);
+
+    doc.save("facture_" + i.number + ".pdf");
+  };
+}
+
+/* ================= WHATSAPP ================= */
+
+function sendWhatsApp(number) {
+
+  let tx = db.transaction("invoices", "readonly");
+  let req = tx.objectStore("invoices").getAll();
+
+  req.onsuccess = () => {
+
+    let i = req.result.find(x => x.number == number);
+
+    let msg =
+`FACTURE N° ${i.number}
+Client: ${i.clientName}
+Travaux: ${i.jobType}
+Total TTC: ${i.total} TND
+Date: ${i.date}
+
+Mohamed Salim Mrad`;
+
+    window.open("https://wa.me/?text=" + encodeURIComponent(msg));
+  };
+}
+
 /* ================= DASHBOARD ================= */
 
 function loadDashboard() {
+
   let tx = db.transaction(["jobs", "expenses"], "readonly");
 
   let jReq = tx.objectStore("jobs").getAll();
