@@ -2,14 +2,33 @@
 
 <h2>Invoices</h2>
 
-<div class="card">
+<div class="card form">
 
-<button onclick="testInvoice()">
-Generate Demo Invoice
+<label>Client</label>
+
+<select id="invoiceClient">
+<option value="">Select Client</option>
+</select>
+
+<label>Job</label>
+
+<select id="invoiceJob">
+<option value="">Select Job</option>
+</select>
+
+<button onclick="generateSelectedInvoice()">
+Generate Professional Invoice
 </button>
 
 </div>
 
-<div id="invoiceList"></div>
+<!-- HISTORY -->
+<div class="card">
+
+<h3>Invoice History</h3>
+
+<div id="invoiceHistory"></div>
+
+</div>
 
 </section>
