@@ -1,21 +1,14 @@
-<section class="page">
+<div class="card">
 
 <h2>Jobs</h2>
 
-<div class="card form">
-
-<select id="jobClient"></select>
+<select id="clientSelect"></select>
 
 <input id="jobType" placeholder="Job type">
+<input id="jobTotal" type="number" placeholder="Total price">
 
-<input id="jobTotal" type="number" placeholder="Price">
-
-<button onclick="saveJob()">
-Save Job
-</button>
+<button onclick="addJob()">Add Job</button>
 
 </div>
 
-<div id="jobsList"></div>
-
-</section>
+<div id="list"></div>
