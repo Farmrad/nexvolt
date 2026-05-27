@@ -1,10 +1,10 @@
 {
-  "name": "Nexvolt Electrician",
-  "short_name": "Nexvolt",
+  "name": "Electrician OS Pro",
+  "short_name": "ElectricianOS",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#0b1220",
-  "theme_color": "#111827",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
   "icons": [
     {
       "src": "icon.png",
