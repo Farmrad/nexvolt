@@ -1,30 +1,25 @@
-window.DB = (() => {
-  const STORE = 'nexvolt_data';
-  let _state = { clients: [], invoices: [], expenses: [], jobs: [], settings: {} };
-
-  function init() {
-    const saved = localStorage.getItem(STORE);
-    if (saved) _state = JSON.parse(saved);
-  }
-
-  function save() {
-    localStorage.setItem(STORE, JSON.stringify(_state));
-  }
-
-  // Backup & Restore
-  const exportData = () => JSON.stringify(_state);
-  const importData = (json) => { _state = JSON.parse(json); save(); };
-
-  function getStats() {
-    const revenue = _state.invoices.filter(i => i.status === 'payée').reduce((a, b) => a + (Number(b.ttc) || 0), 0);
-    const expenses = _state.expenses.reduce((a, b) => a + (Number(b.amount) || 0), 0);
+window.DB = {
+  state: JSON.parse(localStorage.getItem('nexvolt_data')) || {
+    clients: [], invoices: [], expenses: [], jobs: []
+  },
+  save: function() {
+    localStorage.setItem('nexvolt_data', JSON.stringify(this.state));
+  },
+  getStats: function() {
+    const revenue = this.state.invoices.filter(i => i.status === 'paid').reduce((a, b) => a + Number(b.ttc), 0);
+    const unpaid = this.state.invoices.filter(i => i.status === 'unpaid').reduce((a, b) => a + Number(b.ttc), 0);
     return {
       revenue: revenue.toFixed(3),
-      expenses: expenses.toFixed(3),
-      jobs: _state.jobs.filter(j => j.status !== 'Terminé').length,
-      clients: _state.clients.length
+      unpaid: unpaid.toFixed(3),
+      jobs: this.state.jobs.filter(j => j.status !== 'Done').length,
+      clients: this.state.clients.length
     };
+  },
+  backup: function() {
+    return JSON.stringify(this.state);
+  },
+  restore: function(json) {
+    this.state = JSON.parse(json);
+    this.save();
   }
-
-  return { init, state: _state, save, exportData, importData, getStats };
-})();
+};
