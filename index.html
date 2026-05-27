@@ -7,7 +7,6 @@
 
   <title>Nexvolt</title>
 
-  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#111827">
 
@@ -16,59 +15,51 @@
 
 <body onload="initApp()">
 
+<!-- TOP BAR -->
 <header class="topbar">
+
+  <button class="icon-btn" onclick="toggleMenu()">☰</button>
+
   <h1>Nexvolt ⚡</h1>
+
+  <button class="icon-btn" onclick="goBack()">←</button>
+
 </header>
+
+<!-- SIDE MENU -->
+<div id="sideMenu" class="side-menu">
+
+  <h3>Menu</h3>
+
+  <button onclick="showPage('dashboardPage')">Dashboard</button>
+  <button onclick="showPage('jobsPage')">Jobs</button>
+  <button onclick="showPage('clientsPage')">Clients</button>
+  <button onclick="showPage('financePage')">Expenses</button>
+  <button onclick="showPage('invoicesPage')">Invoices</button>
+  <button onclick="showPage('settingsPage')">Settings</button>
+
+</div>
 
 <main>
 
 <!-- DASHBOARD -->
 <section class="page active" id="dashboardPage">
-
   <h2>Dashboard</h2>
 
   <div class="stats-grid">
-
-    <div class="stat-card">
-      <h3 id="totalIncome">0 TND</h3>
-      <p>Income</p>
-    </div>
-
-    <div class="stat-card">
-      <h3 id="totalExpenses">0 TND</h3>
-      <p>Expenses</p>
-    </div>
-
-    <div class="stat-card">
-      <h3 id="profit">0 TND</h3>
-      <p>Profit</p>
-    </div>
-
-    <div class="stat-card">
-      <h3 id="totalJobs">0</h3>
-      <p>Jobs</p>
-    </div>
-
+    <div class="stat-card"><h3 id="totalIncome">0 TND</h3><p>Income</p></div>
+    <div class="stat-card"><h3 id="totalExpenses">0 TND</h3><p>Expenses</p></div>
+    <div class="stat-card"><h3 id="profit">0 TND</h3><p>Profit</p></div>
+    <div class="stat-card"><h3 id="totalJobs">0</h3><p>Jobs</p></div>
   </div>
-
-  <div class="grid">
-    <button onclick="showPage('jobsPage')">Jobs</button>
-    <button onclick="showPage('clientsPage')">Clients</button>
-    <button onclick="showPage('financePage')">Expenses</button>
-    <button onclick="showPage('invoicesPage')">Invoices</button>
-  </div>
-
 </section>
 
 <!-- JOBS -->
 <section class="page" id="jobsPage">
-
   <h2>Jobs</h2>
 
   <div class="card">
-
     <select id="jobClient"></select>
-
     <input id="jobType" placeholder="Job type">
     <input id="jobTotal" type="number" placeholder="Price">
 
@@ -79,65 +70,63 @@
     </select>
 
     <button onclick="saveJob()">Save Job</button>
-
   </div>
 
   <div id="jobsList"></div>
-
 </section>
 
 <!-- CLIENTS -->
 <section class="page" id="clientsPage">
-
   <h2>Clients</h2>
 
   <div class="card">
-
     <input id="clientName" placeholder="Name">
     <input id="clientPhone" placeholder="Phone">
-
     <button onclick="saveClient()">Save Client</button>
-
   </div>
 
   <div id="clientsList"></div>
-
 </section>
 
 <!-- EXPENSES -->
 <section class="page" id="financePage">
-
   <h2>Expenses</h2>
 
   <div class="card">
-
     <input id="expenseCategory" placeholder="Category">
     <input id="expenseAmount" type="number" placeholder="Amount">
-
     <button onclick="saveExpense()">Add Expense</button>
-
   </div>
 
   <div id="expensesList"></div>
-
 </section>
 
 <!-- INVOICES -->
 <section class="page" id="invoicesPage">
-
   <h2>Invoices</h2>
 
   <div class="card">
-
     <select id="invoiceJob"></select>
-
-    <input id="tvaRate" type="number" placeholder="TVA % (19)">
-
+    <input id="tvaRate" type="number" placeholder="TVA %">
     <button onclick="createInvoice()">Generate Invoice</button>
-
   </div>
 
   <div id="invoiceList"></div>
+</section>
+
+<!-- SETTINGS -->
+<section class="page" id="settingsPage">
+  <h2>Settings</h2>
+
+  <div class="card">
+    <h3>Business Info</h3>
+
+    <input id="businessName" placeholder="Business Name">
+    <input id="businessPhone" placeholder="Phone">
+    <input id="businessCity" placeholder="City">
+
+    <button onclick="saveSettings()">Save Settings</button>
+  </div>
 
 </section>
 
