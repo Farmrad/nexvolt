@@ -2,50 +2,55 @@
 <html lang="en">
 
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Electrician OS Pro</title>
 
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0f172a">
-
 <link rel="stylesheet" href="style.css">
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 </head>
 
 <body onload="initApp()">
 
-<div class="app">
+<!-- TOP BAR -->
+<header class="topbar">
 
-<div id="content"></div>
+<div class="menu-btn" onclick="toggleMenu()">☰</div>
+
+<h1>⚡ NEXVOLT</h1>
+
+</header>
+
+<!-- SIDE MENU -->
+<div id="sideMenu" class="side-menu">
+
+<button onclick="loadPage('dashboard'); toggleMenu()">🏠 Dashboard</button>
+<button onclick="loadPage('clients'); toggleMenu()">👤 Clients</button>
+<button onclick="loadPage('jobs'); toggleMenu()">🔧 Jobs</button>
+<button onclick="loadPage('expenses'); toggleMenu()">💸 Expenses</button>
+<button onclick="loadPage('invoices'); toggleMenu()">🧾 Invoices</button>
 
 </div>
 
+<!-- OVERLAY -->
+<div id="overlay" onclick="toggleMenu()"></div>
+
+<!-- MAIN CONTENT -->
+<main id="content"></main>
+
+<!-- BOTTOM NAV -->
 <nav class="bottom-nav">
 
 <button onclick="loadPage('dashboard')">🏠</button>
-<button onclick="loadPage('jobs')">🔧</button>
 <button onclick="loadPage('clients')">👤</button>
 <button onclick="loadPage('expenses')">💸</button>
 <button onclick="loadPage('invoices')">🧾</button>
-<button onclick="loadPage('settings')">⚙️</button>
 
 </nav>
 
-<!-- CORE -->
-<script src="db.js"></script>
+<!-- APP -->
 <script src="app.js"></script>
-
-<!-- MODULES -->
-<script src="modules/invoice.js"></script>
-<script src="modules/charts.js"></script>
-<script src="modules/settings.js"></script>
-<script src="modules/ai.js"></script>
 
 </body>
 </html>
