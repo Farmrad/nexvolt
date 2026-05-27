@@ -2,129 +2,78 @@
 <html lang="en">
 
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Electrician OS Pro</title>
 
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f172a">
+
+<!-- STYLE -->
 <link rel="stylesheet" href="style.css">
+
+<!-- CHART -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<!-- JSPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 </head>
-<script src="modules/invoice.js"></script>
+
 <body onload="initApp()">
 
-<!-- MAIN APP -->
+<!-- APP -->
 <div class="app">
 
-<main>
+<!-- MAIN CONTENT -->
+<div id="content">
 
-<!-- DASHBOARD -->
-<section id="dashboard" class="page active">
-
-<h2>Dashboard</h2>
-
-<div class="grid">
-
-<div class="card"><h3>Income</h3><p id="income">0</p></div>
-<div class="card"><h3>Expenses</h3><p id="expense">0</p></div>
-<div class="card"><h3>Profit</h3><p id="profit">0</p></div>
+<!-- PAGES LOAD HERE -->
 
 </div>
 
-<div class="card">
-<canvas id="chart"></canvas>
 </div>
 
-</section>
-
-<!-- JOBS -->
-<section id="jobs" class="page">
-
-<h2>Jobs</h2>
-
-<div class="card form">
-
-<select id="jobClient"></select>
-<input id="jobType" placeholder="Job type">
-<input id="jobTotal" type="number" placeholder="Price">
-
-<button onclick="saveJob()">Save Job</button>
-
-</div>
-
-<div id="jobsList"></div>
-
-</section>
-
-<!-- CLIENTS -->
-<section id="clients" class="page">
-
-<h2>Clients</h2>
-
-<div class="card form">
-
-<input id="clientName" placeholder="Name">
-<input id="clientPhone" placeholder="Phone">
-
-<button onclick="saveClient()">Save Client</button>
-
-</div>
-
-<div id="clientsList"></div>
-
-</section>
-
-<!-- EXPENSES -->
-<section id="expenses" class="page">
-
-<h2>Expenses</h2>
-
-<div class="card form">
-
-<input id="expenseCategory" placeholder="Category">
-<input id="expenseAmount" type="number" placeholder="Amount">
-
-<button onclick="saveExpense()">Add Expense</button>
-
-</div>
-
-<div id="expensesList"></div>
-
-</section>
-
-<!-- SETTINGS -->
-<section id="settings" class="page">
-
-<h2>Settings</h2>
-
-<div class="card">
-
-<h3>Theme</h3>
-<button onclick="setTheme('dark')">Dark Mode</button>
-<button onclick="setTheme('light')">Light Mode</button>
-
-</div>
-
-</section>
-
-</main>
-
-</div>
-
-<!-- BOTTOM NAVIGATION (IMPORTANT UX FIX) -->
+<!-- BOTTOM NAV -->
 <nav class="bottom-nav">
 
-<button onclick="showPage('dashboard')">🏠</button>
-<button onclick="showPage('jobs')">🔧</button>
-<button onclick="showPage('clients')">👤</button>
-<button onclick="showPage('expenses')">💸</button>
-<button onclick="showPage('settings')">⚙️</button>
+<button onclick="loadPage('dashboard')">
+🏠
+</button>
+
+<button onclick="loadPage('jobs')">
+🔧
+</button>
+
+<button onclick="loadPage('clients')">
+👤
+</button>
+
+<button onclick="loadPage('expenses')">
+💸
+</button>
+
+<button onclick="loadPage('invoices')">
+🧾
+</button>
+
+<button onclick="loadPage('settings')">
+⚙️
+</button>
 
 </nav>
 
+<!-- MAIN -->
 <script src="db.js"></script>
 <script src="app.js"></script>
+
+<!-- MODULES -->
+<script src="modules/invoice.js"></script>
+<script src="modules/charts.js"></script>
+<script src="modules/settings.js"></script>
 
 </body>
 </html>
