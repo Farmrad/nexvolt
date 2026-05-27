@@ -1,16 +1,38 @@
-let db;
+/* =========================
+   LOCAL DATABASE ENGINE
+========================= */
 
-function initDB() {
-  const req = indexedDB.open("NexvoltDB", 1);
+function get(key){
+return JSON.parse(localStorage.getItem(key)) || [];
+}
 
-  req.onupgradeneeded = e => {
-    db = e.target.result;
+function set(key,value){
+localStorage.setItem(key, JSON.stringify(value));
+}
 
-    db.createObjectStore("clients", { keyPath: "id", autoIncrement: true });
-    db.createObjectStore("jobs", { keyPath: "id", autoIncrement: true });
-    db.createObjectStore("expenses", { keyPath: "id", autoIncrement: true });
-    db.createObjectStore("invoices", { keyPath: "id", autoIncrement: true });
-  };
+/* CLIENTS */
+function addClient(client){
+let clients = get("clients");
+clients.push(client);
+set("clients",clients);
+}
 
-  req.onsuccess = e => db = e.target.result;
+function deleteClient(index){
+let clients = get("clients");
+clients.splice(index,1);
+set("clients",clients);
+}
+
+/* JOBS */
+function addJob(job){
+let jobs = get("jobs");
+jobs.push(job);
+set("jobs",jobs);
+}
+
+/* EXPENSES */
+function addExpense(expense){
+let expenses = get("expenses");
+expenses.push(expense);
+set("expenses",expenses);
 }
