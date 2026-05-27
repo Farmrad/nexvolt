@@ -1,0 +1,20 @@
+function toggleMenu() {
+  document.getElementById("sideMenu").classList.toggle("open");
+}
+
+function showPage(id) {
+  historyStack.push(document.querySelector(".page.active")?.id);
+
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+
+  document.getElementById("sideMenu").classList.remove("open");
+}
+
+function goBack() {
+  let last = historyStack.pop();
+  if (!last) return;
+
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById(last).classList.add("active");
+}
