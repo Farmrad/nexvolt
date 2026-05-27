@@ -1,13 +1,8 @@
-/* ============================================================
-   NEXVOLT — db.js
-   IndexedDB storage with localStorage fallback
-   ============================================================ */
-
-const DB = (() => {
+window.DB = (() => {
   const STORE = 'nexvolt_v1';
-  const KEYS  = ['clients','invoices','expenses','jobs','settings'];
+  const KEYS  = ['clients', 'invoices', 'expenses', 'jobs', 'settings'];
 
-  // Internal cache — always in sync with storage
+  // Internal cache — always in sync with local storage
   const _cache = {
     clients:  [],
     invoices: [],
@@ -26,7 +21,7 @@ const DB = (() => {
     }
   };
 
-  /* ---------- helpers ---------- */
+  /* ---------- Helpers ---------- */
   function uid() {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
   }
@@ -47,18 +42,18 @@ const DB = (() => {
 
   function init() {
     KEYS.forEach(_load);
-    // Merge defaults into settings if keys missing
+    // Merge defaults into settings if keys are missing
     const def = _cache.settings;
     const defaults = {
-      company:'Mohamed Salim Mrad', activity:'Travaux Electricité Bâtiment',
-      mf:'1860282/TAC/000', phone:'56 130 571', address:'Sousse, Tunisie',
-      tva:19, timbre:1, invoicePrefix:'F', nextNum:1
+      company: 'Mohamed Salim Mrad', activity: 'Travaux Electricité Bâtiment',
+      mf: '1860282/TAC/000', phone: '56 130 571', address: 'Sousse, Tunisie',
+      tva: 19, timbre: 1, invoicePrefix: 'F', nextNum: 1
     };
     _cache.settings = Object.assign({}, defaults, def);
     console.log('[DB] Initialized. Clients:', _cache.clients.length, '| Invoices:', _cache.invoices.length);
   }
 
-  /* ---------- generic CRUD ---------- */
+  /* ---------- Generic CRUD ---------- */
   function getAll(collection) {
     return [...(_cache[collection] || [])];
   }
@@ -89,7 +84,7 @@ const DB = (() => {
     return _cache[collection].length < before;
   }
 
-  /* ---------- settings ---------- */
+  /* ---------- Settings & Invoice Numbers ---------- */
   function getSettings() {
     return { ..._cache.settings };
   }
@@ -100,11 +95,9 @@ const DB = (() => {
     return _cache.settings;
   }
 
-  /* ---------- invoice number ---------- */
   function nextInvoiceNumber() {
     const s = _cache.settings;
-    const num = `${s.invoicePrefix || 'F'}-${s.nextNum || 1}-${new Date().getFullYear()}`;
-    return num;
+    return `${s.invoicePrefix || 'F'}-${s.nextNum || 1}-${new Date().getFullYear()}`;
   }
 
   function incrementInvoiceNumber() {
@@ -112,35 +105,7 @@ const DB = (() => {
     _save('settings');
   }
 
-  /* ---------- export / import ---------- */
-  function exportAll() {
-    return {
-      _version: 2,
-      exportedAt: new Date().toISOString(),
-      clients:  _cache.clients,
-      invoices: _cache.invoices,
-      expenses: _cache.expenses,
-      jobs:     _cache.jobs,
-      settings: _cache.settings,
-    };
-  }
-
-  function importAll(data) {
-    if (!data || typeof data !== 'object') throw new Error('Invalid backup file');
-    ['clients','invoices','expenses','jobs','settings'].forEach(k => {
-      if (data[k] !== undefined) {
-        _cache[k] = data[k];
-        _save(k);
-      }
-    });
-  }
-
-  function resetAll() {
-    KEYS.forEach(k => localStorage.removeItem(STORE + '_' + k));
-    location.reload();
-  }
-
-  /* ---------- stats helpers ---------- */
+  /* ---------- Dashboard Stats ---------- */
   function stats() {
     const invoices = _cache.invoices;
     const expenses = _cache.expenses;
@@ -153,31 +118,20 @@ const DB = (() => {
       return d.getMonth() === thisM && d.getFullYear() === thisY;
     });
 
-    const totalPaid     = invoices.filter(i => i.status === 'paid').reduce((a, i) => a + (i.ttc || 0), 0);
-    const totalUnpaid   = invoices.filter(i => i.status === 'pending').reduce((a, i) => a + (i.ttc || 0), 0);
-    const monthRevenue  = monthInvoices.filter(i => i.status === 'paid').reduce((a, i) => a + (i.ttc || 0), 0);
+    const totalPaid     = invoices.filter(i => i.status === 'payée').reduce((a, i) => a + (i.ttc || 0), 0);
+    const totalUnpaid   = invoices.filter(i => i.status === 'en attente').reduce((a, i) => a + (i.ttc || 0), 0);
+    const monthRevenue  = monthInvoices.filter(i => i.status === 'payée').reduce((a, i) => a + (i.ttc || 0), 0);
     const totalExpenses = expenses.reduce((a, e) => a + (e.amount || 0), 0);
-    const netProfit     = totalPaid - totalExpenses;
-    const marginPct     = totalPaid > 0 ? (netProfit / totalPaid) * 100 : 0;
-
-    const expByCat = { car: 0, tools: 0, materials: 0, other: 0 };
-    expenses.forEach(e => {
-      if (expByCat[e.cat] !== undefined) expByCat[e.cat] += e.amount || 0;
-      else expByCat.other += e.amount || 0;
-    });
-
+    
     return {
       totalClients: _cache.clients.length,
       totalInvoices: invoices.length,
-      totalPaid, totalUnpaid, monthRevenue,
-      totalExpenses, netProfit, marginPct,
-      expByCat,
-      activeJobs: invoices.filter(i => i.status !== 'paid').length,
+      totalPaid, 
+      totalUnpaid, 
+      monthRevenue,
+      totalExpenses
     };
   }
 
-  return { init, uid, getAll, getById, insert, update, remove,
-           getSettings, saveSettings,
-           nextInvoiceNumber, incrementInvoiceNumber,
-           exportAll, importAll, resetAll, stats };
+  return { init, getAll, getById, insert, update, remove, getSettings, saveSettings, nextInvoiceNumber, incrementInvoiceNumber, stats };
 })();
