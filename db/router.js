@@ -7,7 +7,7 @@ window.Router = (() => {
   };
 
   function go(pageName) {
-    // 1. Update bottom navigation UI active state
+    // 1. Highlight the correct button in the bottom menu
     document.querySelectorAll('.nav-btn').forEach(btn => {
       if (btn.dataset.page === pageName) {
         btn.classList.add('active');
@@ -16,27 +16,27 @@ window.Router = (() => {
       }
     });
     
-    // 2. Close any open modals
+    // 2. Close any open popups/modals securely
     const modalRoot = document.getElementById('modal-root');
     if (modalRoot) {
       const overlay = modalRoot.querySelector('.modal-overlay');
       if (overlay) {
         overlay.classList.remove('open');
-        setTimeout(() => modalRoot.innerHTML = '', 300); // Wait for animation
+        setTimeout(() => modalRoot.innerHTML = '', 300); // Wait for slide-down animation
       } else {
         modalRoot.innerHTML = '';
       }
     }
 
-    // 3. Load the requested page
+    // 3. Load the requested page content into the main <main id="app"> container
     const appContainer = document.getElementById('app');
     if (pages[pageName]) {
       pages[pageName]();
     } else {
-      appContainer.innerHTML = `<div class="empty">Page introuvable</div>`;
+      appContainer.innerHTML = `<div class="empty">Page introuvable ou en construction.</div>`;
     }
     
-    // 4. Scroll to top
+    // 4. Scroll back to top automatically
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
