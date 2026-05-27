@@ -1,21 +1,21 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Initialize DB
-  DB.init();
+  // 1. Initialize DB if it exists
+  if (typeof DB !== 'undefined' && DB.init) {
+    DB.init();
+  }
 
   // 2. Set today's date
   const dateEl = document.getElementById('topbar-date');
   if (dateEl) {
-    dateEl.innerText = new Date().toLocaleDateString('fr-FR', { 
+    dateEl.innerText = new Date().toLocaleDateString('en-US', { 
         weekday: 'long', day: 'numeric', month: 'long' 
     });
   }
 
-  // 3. Register Service Worker (Offline capability)
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js')
-      .catch(err => console.log('SW Registration failed', err));
+  // 3. Start the app - MUST match the variable name in your module (Dashboard)
+  if (typeof Router !== 'undefined') {
+    Router.go('Dashboard'); 
+  } else {
+    console.error("Router is not loaded!");
   }
-
-  // 4. Start the app
-  Router.go('dashboard');
 });
