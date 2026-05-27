@@ -8,65 +8,36 @@
 
 <title>Electrician OS Pro</title>
 
-<!-- PWA -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0f172a">
 
-<!-- STYLE -->
 <link rel="stylesheet" href="style.css">
 
-<!-- CHART -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- JSPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 </head>
 
 <body onload="initApp()">
 
-<!-- APP -->
 <div class="app">
 
-<!-- MAIN CONTENT -->
-<div id="content">
-
-<!-- PAGES LOAD HERE -->
+<div id="content"></div>
 
 </div>
 
-</div>
-
-<!-- BOTTOM NAV -->
 <nav class="bottom-nav">
 
-<button onclick="loadPage('dashboard')">
-🏠
-</button>
-
-<button onclick="loadPage('jobs')">
-🔧
-</button>
-
-<button onclick="loadPage('clients')">
-👤
-</button>
-
-<button onclick="loadPage('expenses')">
-💸
-</button>
-
-<button onclick="loadPage('invoices')">
-🧾
-</button>
-
-<button onclick="loadPage('settings')">
-⚙️
-</button>
+<button onclick="loadPage('dashboard')">🏠</button>
+<button onclick="loadPage('jobs')">🔧</button>
+<button onclick="loadPage('clients')">👤</button>
+<button onclick="loadPage('expenses')">💸</button>
+<button onclick="loadPage('invoices')">🧾</button>
+<button onclick="loadPage('settings')">⚙️</button>
 
 </nav>
 
-<!-- MAIN -->
+<!-- CORE -->
 <script src="db.js"></script>
 <script src="app.js"></script>
 
@@ -74,6 +45,7 @@
 <script src="modules/invoice.js"></script>
 <script src="modules/charts.js"></script>
 <script src="modules/settings.js"></script>
+<script src="modules/ai.js"></script>
 
 </body>
 </html>
