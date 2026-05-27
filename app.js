@@ -1,30 +1,21 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Initialize Database
+  // 1. Initialize DB
   DB.init();
 
-  // Set today's date in the top bar
+  // 2. Set today's date
   const dateEl = document.getElementById('topbar-date');
   if (dateEl) {
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    dateEl.innerText = new Date().toLocaleDateString('fr-FR', options);
+    dateEl.innerText = new Date().toLocaleDateString('fr-FR', { 
+        weekday: 'long', day: 'numeric', month: 'long' 
+    });
   }
 
-  // Register Service Worker for Offline Mode
+  // 3. Register Service Worker (Offline capability)
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('service-worker.js')
-      .then(() => console.log('Service Worker Registered'))
-      .catch(err => console.log('Service Worker Error', err));
+      .catch(err => console.log('SW Registration failed', err));
   }
 
-  // Load the Dashboard by default
+  // 4. Start the app
   Router.go('dashboard');
 });
-
-// Global helper for toast notifications
-window.showToast = (message) => {
-  const toast = document.getElementById('toast');
-  if (!toast) return;
-  toast.innerText = message;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 3000);
-};
