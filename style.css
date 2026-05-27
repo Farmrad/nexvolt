@@ -8,26 +8,24 @@ body {
 .topbar {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  padding: 10px;
   background: #111827;
-  padding: 12px;
 }
 
-.icon-btn {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 20px;
+.page {
+  display: none;
+  padding: 10px;
 }
 
-.page { display: none; padding: 15px; }
-.page.active { display: block; }
+.page.active {
+  display: block;
+}
 
 .card {
   background: #1f2937;
-  padding: 15px;
-  border-radius: 10px;
-  margin-top: 10px;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 8px;
 }
 
 .stats-grid {
@@ -39,36 +37,26 @@ body {
 .stat-card {
   background: #1f2937;
   padding: 10px;
-  border-radius: 10px;
+  border-radius: 8px;
   text-align: center;
 }
 
 input, select {
   width: 100%;
+  margin: 5px 0;
   padding: 10px;
-  margin-top: 8px;
-  border: none;
-  border-radius: 6px;
 }
 
 button {
   width: 100%;
-  margin-top: 10px;
-  padding: 12px;
+  padding: 10px;
+  margin-top: 5px;
   background: #2563eb;
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
-.job-card {
-  background: #1f2937;
-  padding: 10px;
-  margin-top: 8px;
-  border-radius: 8px;
-}
-
-/* SIDE MENU */
 .side-menu {
   position: fixed;
   top: 0;
@@ -76,10 +64,15 @@ button {
   width: 240px;
   height: 100%;
   background: #111827;
-  padding: 15px;
+  padding: 10px;
   transition: 0.3s;
 }
 
 .side-menu.open {
   left: 0;
+}
+
+canvas {
+  background: white;
+  width: 100%;
 }
