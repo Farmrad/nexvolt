@@ -1,26 +1,24 @@
-const CACHE_NAME = "electrician-os-v1";
-
-const FILES_TO_CACHE = [
-  "./",
-  "./index.html",
-  "./style.css",
-  "./app.js",
-  "./db.js",
-  "./manifest.json"
+const CACHE_NAME = 'nexvolt-v1';
+const ASSETS = [
+  './',
+  './index.html',
+  './style.css',
+  './app.js',
+  './db/db.js',
+  './db/router.js',
+  './modules/dashboard.js',
+  './modules/clients.js',
+  './modules/invoice.js',
+  './modules/expenses.js',
+  './modules/job.js'
 ];
 
-self.addEventListener("install", e => {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(FILES_TO_CACHE);
-    })
-  );
+self.addEventListener('install', (e) => {
+  e.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)));
 });
 
-self.addEventListener("fetch", e => {
+self.addEventListener('fetch', (e) => {
   e.respondWith(
-    caches.match(e.request).then(response => {
-      return response || fetch(e.request);
-    })
+    caches.match(e.request).then((res) => res || fetch(e.request))
   );
 });
