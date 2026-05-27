@@ -1,15 +1,17 @@
-window.Dashboard = (() => {
-  function render() {
+window.Dashboard = {
+  render: () => {
     const s = DB.getStats();
-    document.getElementById('app').innerHTML = `
+    return `
       <div class="page">
-        <div class="stats">
-          <div class="stat"><div class="stat-label">Revenus</div><div class="stat-val accent">${s.revenue.toFixed(3)}</div></div>
-          <div class="stat"><div class="stat-label">Chantiers</div><div class="stat-val blue">${s.jobs}</div></div>
-          <div class="stat"><div class="stat-label">Clients</div><div class="stat-val green">${s.clients}</div></div>
-          <div class="stat"><div class="stat-label">Dépenses</div><div class="stat-val red">${s.expenses.toFixed(3)}</div></div>
+        <h3>Analytics</h3>
+        <div class="stats-grid">
+          <div class="stat-card">Revenu: ${s.revenue} TND</div>
+          <div class="stat-card">Dépenses: ${s.expenses} TND</div>
+          <div class="stat-card">Chantiers: ${s.jobs}</div>
+          <div class="stat-card">Clients: ${s.clients}</div>
         </div>
-      </div>`;
+        <button onclick="DB.exportData()">Backup Data (Copy to Clipboard)</button>
+      </div>
+    `;
   }
-  return { render };
-})();
+};
