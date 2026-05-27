@@ -14,28 +14,15 @@
 
 <body onload="initApp()">
 
-<!-- FLOATING MENU (FIX FOR MOBILE) -->
-<button id="menuBtn" onclick="toggleMenu()">☰</button>
-
-<div id="sideMenu" class="side">
-
-<h3>⚡ Nexvolt</h3>
-
-<button onclick="showPage('dashboard')">Dashboard</button>
-<button onclick="showPage('jobs')">Jobs</button>
-<button onclick="showPage('clients')">Clients</button>
-<button onclick="showPage('expenses')">Expenses</button>
-<button onclick="showPage('invoices')">Invoices</button>
-<button onclick="showPage('settings')">Settings</button>
-
-</div>
+<!-- MAIN APP -->
+<div class="app">
 
 <main>
 
 <!-- DASHBOARD -->
 <section id="dashboard" class="page active">
 
-<h1>Dashboard</h1>
+<h2>Dashboard</h2>
 
 <div class="grid">
 
@@ -45,13 +32,8 @@
 
 </div>
 
-<!-- CHARTS -->
 <div class="card">
-<canvas id="barChart"></canvas>
-</div>
-
-<div class="card">
-<canvas id="pieChart"></canvas>
+<canvas id="chart"></canvas>
 </div>
 
 </section>
@@ -75,6 +57,42 @@
 
 </section>
 
+<!-- CLIENTS -->
+<section id="clients" class="page">
+
+<h2>Clients</h2>
+
+<div class="card form">
+
+<input id="clientName" placeholder="Name">
+<input id="clientPhone" placeholder="Phone">
+
+<button onclick="saveClient()">Save Client</button>
+
+</div>
+
+<div id="clientsList"></div>
+
+</section>
+
+<!-- EXPENSES -->
+<section id="expenses" class="page">
+
+<h2>Expenses</h2>
+
+<div class="card form">
+
+<input id="expenseCategory" placeholder="Category">
+<input id="expenseAmount" type="number" placeholder="Amount">
+
+<button onclick="saveExpense()">Add Expense</button>
+
+</div>
+
+<div id="expensesList"></div>
+
+</section>
+
 <!-- SETTINGS -->
 <section id="settings" class="page">
 
@@ -88,18 +106,22 @@
 
 </div>
 
-<div class="card">
-
-<h3>Language</h3>
-<button onclick="setLang('fr')">Français</button>
-<button onclick="setLang('en')">English</button>
-<button onclick="setLang('ar')">Arabic</button>
-
-</div>
-
 </section>
 
 </main>
+
+</div>
+
+<!-- BOTTOM NAVIGATION (IMPORTANT UX FIX) -->
+<nav class="bottom-nav">
+
+<button onclick="showPage('dashboard')">🏠</button>
+<button onclick="showPage('jobs')">🔧</button>
+<button onclick="showPage('clients')">👤</button>
+<button onclick="showPage('expenses')">💸</button>
+<button onclick="showPage('settings')">⚙️</button>
+
+</nav>
 
 <script src="db.js"></script>
 <script src="app.js"></script>
