@@ -1,13 +1,12 @@
 window.DB = (() => {
   const STORE = 'nexvolt_v1';
-  const KEYS  = ['clients', 'invoices', 'expenses', 'jobs', 'settings'];
+  const KEYS  = ['clients', 'invoices', 'expenses', 'settings'];
 
   // Internal cache — always in sync with local storage
   const _cache = {
     clients:  [],
     invoices: [],
     expenses: [],
-    jobs:     [],
     settings: {
       company:  'Mohamed Salim Mrad',
       activity: 'Travaux Electricité Bâtiment',
@@ -42,7 +41,7 @@ window.DB = (() => {
 
   function init() {
     KEYS.forEach(_load);
-    // Merge defaults into settings if keys are missing
+    // Merge defaults into settings if anything is missing
     const def = _cache.settings;
     const defaults = {
       company: 'Mohamed Salim Mrad', activity: 'Travaux Electricité Bâtiment',
@@ -50,7 +49,7 @@ window.DB = (() => {
       tva: 19, timbre: 1, invoicePrefix: 'F', nextNum: 1
     };
     _cache.settings = Object.assign({}, defaults, def);
-    console.log('[DB] Initialized. Clients:', _cache.clients.length, '| Invoices:', _cache.invoices.length);
+    console.log('⚡ Nexvolt DB Ready. Clients:', _cache.clients.length);
   }
 
   /* ---------- Generic CRUD ---------- */
@@ -69,14 +68,6 @@ window.DB = (() => {
     return record;
   }
 
-  function update(collection, id, data) {
-    const idx = _cache[collection].findIndex(r => r.id === id);
-    if (idx === -1) return null;
-    _cache[collection][idx] = { ..._cache[collection][idx], ...data, updatedAt: Date.now() };
-    _save(collection);
-    return _cache[collection][idx];
-  }
-
   function remove(collection, id) {
     const before = _cache[collection].length;
     _cache[collection] = _cache[collection].filter(r => r.id !== id);
@@ -87,12 +78,6 @@ window.DB = (() => {
   /* ---------- Settings & Invoice Numbers ---------- */
   function getSettings() {
     return { ..._cache.settings };
-  }
-
-  function saveSettings(data) {
-    _cache.settings = { ..._cache.settings, ...data };
-    _save('settings');
-    return _cache.settings;
   }
 
   function nextInvoiceNumber() {
@@ -133,5 +118,5 @@ window.DB = (() => {
     };
   }
 
-  return { init, getAll, getById, insert, update, remove, getSettings, saveSettings, nextInvoiceNumber, incrementInvoiceNumber, stats };
+  return { init, getAll, getById, insert, remove, getSettings, nextInvoiceNumber, incrementInvoiceNumber, stats };
 })();
