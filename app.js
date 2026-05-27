@@ -1,6 +1,5 @@
 let db;
 
-/* INIT */
 function initApp(){
 initDB();
 setTimeout(()=>{
@@ -14,7 +13,13 @@ renderChart();
 },300);
 }
 
-/* DASHBOARD NUMBERS */
+/* NAV */
+function showPage(id){
+document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+}
+
+/* DASHBOARD */
 function loadDashboard(){
 
 let tx=db.transaction(["jobs","expenses","invoices"],"readonly");
@@ -31,34 +36,46 @@ let income=j.result.reduce((a,b)=>a+b.total,0);
 let expense=e.result.reduce((a,b)=>a+b.amount,0);
 let unpaid=i.result.filter(x=>!x.paid).reduce((a,b)=>a+b.total,0);
 
-incomeEl.innerText=income+" TND";
-expenseEl.innerText=expense+" TND";
-profit.innerText=(income-expense)+" TND";
-unpaidEl.innerText=unpaid+" TND";
-
+document.getElementById("income").innerText=income+" TND";
+document.getElementById("expense").innerText=expense+" TND";
+document.getElementById("profit").innerText=(income-expense)+" TND";
+document.getElementById("unpaid").innerText=unpaid+" TND";
 };
 };
 };
 }
 
-/* CHART (FINTECH STYLE GRAPH) */
+/* CHART */
 function renderChart(){
 
-let ctx=document.getElementById("chart");
+const ctx=document.getElementById("chart");
 
 new Chart(ctx,{
 type:"line",
 data:{
 labels:["Mon","Tue","Wed","Thu","Fri","Sat"],
-datasets:[{
+datasets:[
+{
 label:"Income",
 data:[120,200,150,300,250,400],
-borderColor:"#22c55e"
-},{
+borderColor:"#22c55e",
+tension:0.4
+},
+{
 label:"Expenses",
 data:[80,100,90,120,110,150],
-borderColor:"#ef4444"
-}]
+borderColor:"#ef4444",
+tension:0.4
+}
+]
+},
+options:{
+responsive:true,
+plugins:{legend:{labels:{color:"white"}}},
+scales:{
+x:{ticks:{color:"white"}},
+y:{ticks:{color:"white"}}
+}
 }
 });
 }
