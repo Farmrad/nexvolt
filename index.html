@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -14,27 +14,23 @@
 </head>
 <body>
 
-  <!-- TOP BAR -->
   <header class="topbar">
     <div>
       <div class="logo">NEX<span>VOLT</span> ⚡</div>
       <div class="topbar-sub" id="topbar-date"></div>
     </div>
-    <div id="topbar-right"></div>
   </header>
 
-  <!-- PAGES (injected by router) -->
   <main id="app"></main>
 
-  <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
     <button class="nav-btn active" data-page="dashboard" onclick="Router.go('dashboard')">
       <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      <span>Home</span>
+      <span>Accueil</span>
     </button>
     <button class="nav-btn" data-page="invoices" onclick="Router.go('invoices')">
       <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-      <span>Invoices</span>
+      <span>Factures</span>
     </button>
     <button class="nav-btn" data-page="clients" onclick="Router.go('clients')">
       <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -42,38 +38,22 @@
     </button>
     <button class="nav-btn" data-page="expenses" onclick="Router.go('expenses')">
       <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-      <span>Expenses</span>
-    </button>
-    <button class="nav-btn" data-page="finance" onclick="Router.go('finance')">
-      <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      <span>Finance</span>
-    </button>
-    <button class="nav-btn" data-page="settings" onclick="Router.go('settings')">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      <span>Settings</span>
+      <span>Dépenses</span>
     </button>
   </nav>
 
-  <!-- MODAL CONTAINER -->
   <div id="modal-root"></div>
 
-  <!-- TOAST -->
   <div id="toast" class="toast"></div>
 
-  <!-- SCRIPTS — order matters -->
   <script src="core/db.js"></script>
   <script src="core/router.js"></script>
-  <script src="core/ai.js"></script>
-  <script src="modules/clients.js"></script>
-  <script src="modules/invoices.js"></script>
-  <script src="modules/expenses.js"></script>
-  <script src="modules/jobs.js"></script>
+  
   <script src="pages/dashboard.js"></script>
-  <script src="pages/invoices-page.js"></script>
   <script src="pages/clients-page.js"></script>
+  <script src="pages/invoices-page.js"></script>
   <script src="pages/expenses-page.js"></script>
-  <script src="pages/finance-page.js"></script>
-  <script src="pages/settings-page.js"></script>
+  
   <script src="app.js"></script>
 </body>
 </html>
