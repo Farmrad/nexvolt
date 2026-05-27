@@ -11,26 +11,19 @@
   <meta name="theme-color" content="#111827">
 
   <link rel="stylesheet" href="style.css">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 
 <body onload="initApp()">
 
-<!-- TOP BAR -->
 <header class="topbar">
-
-  <button class="icon-btn" onclick="toggleMenu()">☰</button>
-
+  <button onclick="toggleMenu()">☰</button>
   <h1>Nexvolt ⚡</h1>
-
-  <button class="icon-btn" onclick="goBack()">←</button>
-
+  <button onclick="goBack()">←</button>
 </header>
 
-<!-- SIDE MENU -->
 <div id="sideMenu" class="side-menu">
-
-  <h3>Menu</h3>
-
   <button onclick="showPage('dashboardPage')">Dashboard</button>
   <button onclick="showPage('jobsPage')">Jobs</button>
   <button onclick="showPage('clientsPage')">Clients</button>
@@ -38,6 +31,10 @@
   <button onclick="showPage('invoicesPage')">Invoices</button>
   <button onclick="showPage('settingsPage')">Settings</button>
 
+  <hr>
+
+  <button onclick="exportBackup()">Export Backup</button>
+  <input type="file" onchange="importBackup(event)">
 </div>
 
 <main>
@@ -47,9 +44,9 @@
   <h2>Dashboard</h2>
 
   <div class="stats-grid">
-    <div class="stat-card"><h3 id="totalIncome">0 TND</h3><p>Income</p></div>
-    <div class="stat-card"><h3 id="totalExpenses">0 TND</h3><p>Expenses</p></div>
-    <div class="stat-card"><h3 id="profit">0 TND</h3><p>Profit</p></div>
+    <div class="stat-card"><h3 id="totalIncome">0</h3><p>Income</p></div>
+    <div class="stat-card"><h3 id="totalExpenses">0</h3><p>Expenses</p></div>
+    <div class="stat-card"><h3 id="profit">0</h3><p>Profit</p></div>
     <div class="stat-card"><h3 id="totalJobs">0</h3><p>Jobs</p></div>
   </div>
 </section>
@@ -62,14 +59,29 @@
     <select id="jobClient"></select>
     <input id="jobType" placeholder="Job type">
     <input id="jobTotal" type="number" placeholder="Price">
-
     <select id="jobStatus">
-      <option value="active">Active</option>
-      <option value="completed">Completed</option>
-      <option value="pending">Pending</option>
+      <option>active</option>
+      <option>completed</option>
+      <option>pending</option>
     </select>
 
     <button onclick="saveJob()">Save Job</button>
+  </div>
+
+  <!-- PHOTOS -->
+  <div class="card">
+    <h3>Photos</h3>
+    <input type="file" id="jobPhoto" accept="image/*" capture="environment">
+    <button onclick="addJobPhoto()">Add Photo</button>
+    <div id="photoPreview"></div>
+  </div>
+
+  <!-- SIGNATURE -->
+  <div class="card">
+    <h3>Signature</h3>
+    <canvas id="signaturePad" width="300" height="150"></canvas>
+    <button onclick="saveSignature()">Save Signature</button>
+    <button onclick="clearSignature()">Clear</button>
   </div>
 
   <div id="jobsList"></div>
@@ -119,27 +131,17 @@
   <h2>Settings</h2>
 
   <div class="card">
-    <h3>Business Info</h3>
-
     <input id="businessName" placeholder="Business Name">
     <input id="businessPhone" placeholder="Phone">
     <input id="businessCity" placeholder="City">
-
     <button onclick="saveSettings()">Save Settings</button>
   </div>
-
 </section>
 
 </main>
 
 <script src="db/db.js"></script>
 <script src="app.js"></script>
-
-<script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js");
-}
-</script>
 
 </body>
 </html>
