@@ -1,64 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Electrician Manager</title>
+<title>Electrician OS Pro</title>
 
 <link rel="stylesheet" href="style.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body onload="initApp()">
 
-<header class="topbar">
-<button onclick="toggleMenu()">☰</button>
-<h1>Electrician App</h1>
-<button onclick="goBack()">←</button>
-</header>
+<div class="app">
 
-<div id="sideMenu" class="side-menu">
+<!-- SIDEBAR -->
+<div class="sidebar">
+
+<h2>⚡ Nexvolt</h2>
 
 <button onclick="showPage('dashboard')">Dashboard</button>
 <button onclick="showPage('jobs')">Jobs</button>
 <button onclick="showPage('clients')">Clients</button>
 <button onclick="showPage('expenses')">Expenses</button>
 <button onclick="showPage('invoices')">Invoices</button>
-<button onclick="showPage('cashflow')">Cashflow</button>
 
-<hr>
-
-<button onclick="exportBackup()">Export Backup</button>
-<input type="file" onchange="importBackup(event)">
 </div>
 
-<main>
+<!-- MAIN -->
+<div class="main">
 
 <!-- DASHBOARD -->
 <section id="dashboard" class="page active">
-<h2>Dashboard</h2>
 
-<div class="stats-grid">
-<div class="card"><h3 id="income">0</h3><p>Income</p></div>
-<div class="card"><h3 id="expense">0</h3><p>Expenses</p></div>
-<div class="card"><h3 id="profit">0</h3><p>Profit</p></div>
-<div class="card"><h3 id="unpaid">0</h3><p>Unpaid</p></div>
+<h1>Dashboard</h1>
+
+<div class="grid">
+
+<div class="card gradient">
+<h3>Income</h3>
+<p id="income">0 TND</p>
 </div>
+
+<div class="card gradient2">
+<h3>Expenses</h3>
+<p id="expense">0 TND</p>
+</div>
+
+<div class="card gradient3">
+<h3>Profit</h3>
+<p id="profit">0 TND</p>
+</div>
+
+<div class="card dark">
+<h3>Unpaid</h3>
+<p id="unpaid">0 TND</p>
+</div>
+
+</div>
+
+<!-- CHART -->
+<div class="card">
+<canvas id="chart"></canvas>
+</div>
+
 </section>
 
 <!-- JOBS -->
 <section id="jobs" class="page">
+
 <h2>Jobs</h2>
 
 <div class="card">
 <select id="jobClient"></select>
-<input id="jobType" placeholder="Type">
+<input id="jobType" placeholder="Job type">
 <input id="jobTotal" type="number" placeholder="Price">
 <button onclick="saveJob()">Save Job</button>
 </div>
 
 <div id="jobsList"></div>
+
 </section>
 
 <!-- CLIENTS -->
@@ -72,6 +94,7 @@
 </div>
 
 <div id="clientsList"></div>
+
 </section>
 
 <!-- EXPENSES -->
@@ -85,6 +108,7 @@
 </div>
 
 <div id="expensesList"></div>
+
 </section>
 
 <!-- INVOICES -->
@@ -98,16 +122,12 @@
 </div>
 
 <div id="invoiceList"></div>
+
 </section>
 
-<!-- CASHFLOW -->
-<section id="cashflow" class="page">
-<h2>Cashflow</h2>
+</div>
 
-<div id="unpaidList"></div>
-</section>
-
-</main>
+</div>
 
 <script src="db.js"></script>
 <script src="app.js"></script>
