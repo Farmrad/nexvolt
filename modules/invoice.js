@@ -1,337 +1,288 @@
-/* ============================================================
-   NEXVOLT — modules/invoices.js
-   Invoice management: create, preview (French), print, mark paid
-   ============================================================ */
+window.InvoicesPage = (() => {
+  let currentItems = [];
 
-const Invoices = (() => {
-  let _descLines = [];
+  function render() {
+    const app = document.getElementById('app');
+    const invoices = DB.getAll('invoices').sort((a, b) => b.createdAt - a.createdAt);
 
-  /* ---------- Modal: Add Invoice ---------- */
-  function showAddModal(preselectedClientId = '') {
-    const clients = DB.getAll('clients');
-    const s       = DB.getSettings();
-    const invNum  = DB.nextInvoiceNumber();
+    let html = `
+      <div class="page">
+        <div class="section-hdr">
+          <div class="section-title">Factures</div>
+          <button class="btn btn-primary btn-sm" onclick="InvoicesPage.openForm()">+ Nouvelle Facture</button>
+        </div>
+    `;
 
-    const clientOptions = clients.map(c =>
-      `<option value="${c.id}" ${c.id === preselectedClientId ? 'selected' : ''}>${c.name}</option>`
-    ).join('');
+    if (invoices.length === 0) {
+      html += `
+        <div class="empty">
+          <div class="empty-icon">📄</div>
+          <div class="empty-text">Aucune facture pour le moment.</div>
+        </div>
+      `;
+    } else {
+      invoices.forEach(inv => {
+        let statusClass = inv.status === 'payée' ? 'paid' : 'pending';
+        html += `
+          <div class="item" onclick="InvoicesPage.viewInvoice('${inv.id}')">
+            <div class="item-icon blue">📄</div>
+            <div class="item-body">
+              <div class="item-name">${inv.clientName || 'Client Inconnu'}</div>
+              <div class="item-sub">${inv.number} • ${new Date(inv.date).toLocaleDateString('fr-FR')}</div>
+              <span class="badge ${statusClass}" style="margin-top:4px;">${inv.status}</span>
+            </div>
+            <div class="item-right">
+              <div class="item-amount">${inv.ttc.toFixed(3)} DT</div>
+            </div>
+          </div>
+        `;
+      });
+    }
 
-    openModal(`
-      <div class="modal-overlay">
-        <div class="modal">
+    html += `</div>`;
+    app.innerHTML = html;
+  }
+
+  function openForm() {
+    currentItems = []; // Reset items
+    const num = DB.nextInvoiceNumber();
+    const today = new Date().toISOString().split('T')[0];
+
+    const modal = document.getElementById('modal-root');
+    modal.innerHTML = `
+      <div class="modal-overlay open" id="inv-modal">
+        <div class="modal" style="max-width: 600px;">
           <div class="modal-hdr">
-            <span class="modal-title">📄 New Invoice</span>
-            <button class="modal-close" onclick="closeModal()">✕ Close</button>
+            <div class="modal-title">Créer Facture</div>
+            <button class="modal-close" onclick="InvoicesPage.closeForm()">Fermer</button>
           </div>
-
+          
           <div class="form-group">
-            <label class="form-label">Client</label>
-            <select class="form-input" id="inv-client">
-              <option value="">— Select a client —</option>
-              ${clientOptions}
-            </select>
+            <label class="form-label">Client / Entreprise</label>
+            <input type="text" id="inv-client" class="form-input" placeholder="Ex: Comptoir Moderne">
           </div>
-
+          
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label">Invoice No.</label>
-              <input class="form-input" id="inv-num" value="${invNum}">
+              <label class="form-label">Matricule Fiscale (M.F)</label>
+              <input type="text" id="inv-mf" class="form-input" placeholder="Ex: 160571/XBM/000">
             </div>
             <div class="form-group">
-              <label class="form-label">Date</label>
-              <input class="form-input" type="date" id="inv-date" value="${today()}">
+              <label class="form-label">Lieu / Adresse</label>
+              <input type="text" id="inv-lieu" class="form-input" placeholder="Ex: Akouda">
             </div>
           </div>
 
-          <div class="form-group">
-            <label class="form-label">Job Type</label>
-            <select class="form-input" id="inv-type">
-              <option>Installation électrique</option>
-              <option>Dépannage</option>
-              <option>Smart Home</option>
-              <option>Maintenance</option>
-              <option>Câblage réseau / caméras</option>
-              <option>Sous-traitance</option>
-              <option>Autre</option>
-            </select>
+          <div class="divider"></div>
+          <div class="section-title" style="margin-bottom:8px;">Articles / Services</div>
+          
+          <div id="inv-items-list"></div>
+
+          <div class="form-row-3" style="margin-bottom: 16px;">
+            <input type="text" id="item-desc" class="form-input" placeholder="Description (ex: coffret 6v)">
+            <input type="number" id="item-qty" class="form-input" placeholder="Qté" value="1" min="1">
+            <input type="number" id="item-price" class="form-input" placeholder="P.U HT">
+            <button class="btn btn-secondary" onclick="InvoicesPage.addItem()">+</button>
           </div>
 
-          <div class="form-group">
-            <label class="form-label">Work Description (lines)</label>
-            <div id="desc-lines-wrap" class="desc-lines-wrap"></div>
-            <button class="btn btn-outline btn-sm" onclick="Invoices.addLine()" style="margin-top:4px">+ Add line</button>
+          <div class="totals-box">
+            <div class="totals-row"><span>Total H.T</span><span id="calc-ht">0.000 DT</span></div>
+            <div class="totals-row"><span>TVA (19%)</span><span id="calc-tva">0.000 DT</span></div>
+            <div class="totals-row"><span>Droit de timbre</span><span>1.000 DT</span></div>
+            <div class="totals-final"><span>Total TTC</span><span id="calc-ttc">0.000 DT</span></div>
           </div>
 
-          <div class="form-group">
-            <label class="form-label">Payment Status</label>
-            <select class="form-input" id="inv-status">
-              <option value="pending">Pending</option>
-              <option value="partial">Partial</option>
-              <option value="paid">Paid</option>
-            </select>
-          </div>
-
-          <div class="totals-box" id="inv-totals-box">
-            <div class="totals-row"><span>Total HT</span><span id="calc-ht">0.000 TND</span></div>
-            <div class="totals-row"><span>TVA (${s.tva}%)</span><span id="calc-tva">0.000 TND</span></div>
-            <div class="totals-row"><span>Droit de timbre</span><span id="calc-timbre">${(s.timbre || 1).toFixed(3)} TND</span></div>
-            <div class="totals-final">
-              <span style="color:var(--accent)">Total TTC</span>
-              <span id="calc-ttc" style="color:var(--accent)">0.000 TND</span>
-            </div>
-          </div>
-
-          <button class="btn btn-primary btn-full" onclick="Invoices.save()">
-            💾 Save Invoice
-          </button>
+          <button class="btn btn-primary btn-full" onclick="InvoicesPage.saveInvoice()">Enregistrer la facture</button>
         </div>
       </div>
-    `);
-
-    // Init description lines
-    _descLines = [];
-    addLine();
-    addLine();
+    `;
+    updateTotals();
   }
 
-  /* ---------- Description lines ---------- */
-  function addLine() {
-    const id = 'dl-' + Date.now() + Math.random().toString(36).slice(2, 5);
-    _descLines.push(id);
-    const wrap = document.getElementById('desc-lines-wrap');
-    if (!wrap) return;
-    const div = document.createElement('div');
-    div.className = 'desc-line';
-    div.id = id;
-    div.innerHTML = `
-      <input class="form-input dl-desc" placeholder="e.g. Tirage câble 2.5mm²" oninput="Invoices.calcTotals()">
-      <input class="form-input dl-qty"  type="number" value="1" min="0.01" step="0.1" placeholder="Qty" oninput="Invoices.calcTotals()" style="width:64px">
-      <input class="form-input dl-price" type="number" placeholder="P.U HT" step="0.001" oninput="Invoices.calcTotals()" style="width:96px">
-      <button class="btn-icon" onclick="Invoices.removeLine('${id}')">✕</button>`;
-    wrap.appendChild(div);
+  function addItem() {
+    const desc = document.getElementById('item-desc').value;
+    const qty = parseFloat(document.getElementById('item-qty').value);
+    const price = parseFloat(document.getElementById('item-price').value);
+
+    if (!desc || !qty || !price) return;
+
+    currentItems.push({ desc, qty, price, totalHT: qty * price });
+    
+    document.getElementById('item-desc').value = '';
+    document.getElementById('item-qty').value = '1';
+    document.getElementById('item-price').value = '';
+    
+    renderItemsList();
+    updateTotals();
   }
 
-  function removeLine(id) {
-    const el = document.getElementById(id);
-    if (el) el.remove();
-    _descLines = _descLines.filter(x => x !== id);
-    calcTotals();
-  }
-
-  function getLines() {
-    const wrap = document.getElementById('desc-lines-wrap');
-    if (!wrap) return [];
-    return Array.from(wrap.querySelectorAll('.desc-line')).map(row => ({
-      desc:  row.querySelector('.dl-desc').value.trim(),
-      qty:   parseFloat(row.querySelector('.dl-qty').value) || 1,
-      price: parseFloat(row.querySelector('.dl-price').value) || 0,
-    })).filter(l => l.desc || l.price > 0);
-  }
-
-  function calcTotals() {
-    const lines  = getLines();
-    const s      = DB.getSettings();
-    const ht     = lines.reduce((a, l) => a + l.qty * l.price, 0);
-    const tvaAmt = ht * ((s.tva || 19) / 100);
-    const timbre = s.timbre || 1;
-    const ttc    = ht + tvaAmt + timbre;
-
-    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-    set('calc-ht',  ht.toFixed(3) + ' TND');
-    set('calc-tva', tvaAmt.toFixed(3) + ' TND');
-    set('calc-timbre', timbre.toFixed(3) + ' TND');
-    set('calc-ttc', ttc.toFixed(3) + ' TND');
-  }
-
-  /* ---------- Save ---------- */
-  function save() {
-    const clientId = document.getElementById('inv-client').value;
-    if (!clientId) { showToast('⚠️ Select a client first'); return; }
-    const lines = getLines();
-    if (!lines.length) { showToast('⚠️ Add at least one work line'); return; }
-
-    const s      = DB.getSettings();
-    const ht     = lines.reduce((a, l) => a + l.qty * l.price, 0);
-    const tvaAmt = ht * ((s.tva || 19) / 100);
-    const timbre = s.timbre || 1;
-    const ttc    = ht + tvaAmt + timbre;
-
-    const inv = DB.insert('invoices', {
-      num:      document.getElementById('inv-num').value,
-      clientId,
-      date:     document.getElementById('inv-date').value,
-      type:     document.getElementById('inv-type').value,
-      lines,
-      ht, tvaAmt, timbre, ttc,
-      status:   document.getElementById('inv-status').value,
-    });
-
-    DB.incrementInvoiceNumber();
-    closeModal();
-    showToast('✅ Invoice N°' + inv.num + ' saved');
-    Router.go(Router.current() === 'invoices' ? 'invoices' : 'dashboard');
-  }
-
-  /* ---------- Preview (French invoice doc) ---------- */
-  function preview(id) {
-    const inv = DB.getById('invoices', id);
-    if (!inv) return;
-    const cl = DB.getById('clients', inv.clientId);
-    const s  = DB.getSettings();
-
-    const rows = (inv.lines || []).map(l => `
-      <tr>
-        <td>${l.desc}</td>
-        <td>${l.qty}</td>
-        <td>${(l.price).toFixed(3)}</td>
-        <td>${(l.qty * l.price).toFixed(3)}</td>
-      </tr>`).join('');
-
-    openModal(`
-      <div class="modal-overlay">
-        <div class="modal" style="max-width:540px">
-          <div class="modal-hdr no-print">
-            <span class="modal-title">🖨️ Invoice Preview</span>
-            <button class="modal-close" onclick="closeModal()">✕ Close</button>
-          </div>
-
-          <div class="invoice-doc" id="inv-print-area">
-            <!-- HEADER -->
-            <div class="inv-hdr">
-              <div>
-                <div class="inv-co">${s.company || 'Votre Entreprise'}</div>
-                <div class="inv-co-sub">
-                  ${s.activity || ''}<br>
-                  M.F : ${s.mf || '—'}<br>
-                  GSM : ${s.phone || '—'}<br>
-                  ${s.address || ''}
-                </div>
-              </div>
-              <div style="text-align:right">
-                <div class="inv-badge">FACTURE N° ${inv.num}</div>
-                <div style="font-size:11px;color:#555;margin-top:8px">Date : ${fmtDate(inv.date)}</div>
-                <div style="font-size:11px;color:#555">Lieu : ${cl ? (cl.loc || s.address || '') : ''}</div>
-              </div>
-            </div>
-
-            <!-- PARTIES -->
-            <div class="inv-parties">
-              <div>
-                <div class="inv-party-lbl">Fournisseur</div>
-                <div class="inv-party-name">${s.company || '—'}</div>
-                <div class="inv-party-det">
-                  M.F : ${s.mf || '—'}<br>
-                  Tél : ${s.phone || '—'}<br>
-                  ${s.address || ''}
-                </div>
-              </div>
-              <div>
-                <div class="inv-party-lbl">Client</div>
-                <div class="inv-party-name">${cl ? cl.name : '—'}</div>
-                <div class="inv-party-det">
-                  ${cl && cl.clientId ? 'ID : ' + cl.clientId + '<br>' : ''}
-                  ${cl && cl.mf ? 'M.F : ' + cl.mf + '<br>' : ''}
-                  ${cl && cl.phone ? 'Tél : ' + cl.phone + '<br>' : ''}
-                  ${cl && cl.loc ? cl.loc : ''}
-                </div>
-              </div>
-            </div>
-
-            <!-- TYPE -->
-            <div style="font-size:11px;color:#555;margin-bottom:12px">
-              Objet : <strong style="color:#111">${inv.type || ''}</strong>
-            </div>
-
-            <!-- TABLE -->
-            <table class="inv-table">
-              <thead>
-                <tr>
-                  <th>Description</th>
-                  <th>Qté</th>
-                  <th>P.U HT</th>
-                  <th>Montant HT</th>
-                </tr>
-              </thead>
-              <tbody>${rows}</tbody>
-            </table>
-
-            <!-- TOTALS -->
-            <div class="inv-totals">
-              <div class="inv-total-row"><span>Total H.T</span><span>${(inv.ht || 0).toFixed(3)} TND</span></div>
-              <div class="inv-total-row"><span>TVA ${s.tva || 19}%</span><span>${(inv.tvaAmt || 0).toFixed(3)} TND</span></div>
-              <div class="inv-total-row"><span>Droit de timbre</span><span>${(inv.timbre || 1).toFixed(3)} TND</span></div>
-              <div class="inv-total-final"><span>Total TTC</span><span>${(inv.ttc || 0).toFixed(3)} TND</span></div>
-            </div>
-
-            <!-- FOOTER -->
-            <div class="inv-footer">
-              La présente facture est arrêtée à la somme de :<br>
-              <strong>${numToWords(inv.ttc)}</strong> dinars tunisiens<br>
-            </div>
-
-            <!-- SIGNATURE -->
-            <div class="inv-signature">
-              <div class="inv-signature-box">Cachet et Signature</div>
-            </div>
-          </div>
-
-          <!-- ACTIONS -->
-          <div style="display:flex;gap:8px;margin-top:16px" class="no-print">
-            <button class="btn btn-secondary btn-full" onclick="window.print()">🖨️ Print</button>
-            <button class="btn btn-primary btn-full" onclick="Invoices.markPaid('${id}')">✅ Mark Paid</button>
-          </div>
-          <div style="display:flex;gap:8px;margin-top:8px" class="no-print">
-            <button class="btn btn-danger btn-full" onclick="Invoices.remove('${id}')">🗑️ Delete</button>
-          </div>
-        </div>
+  function renderItemsList() {
+    const list = document.getElementById('inv-items-list');
+    list.innerHTML = currentItems.map((item, index) => `
+      <div class="desc-line">
+        <div class="dl-desc form-input" style="background:var(--bg2)">${item.desc}</div>
+        <div class="dl-qty form-input" style="background:var(--bg2); text-align:center;">${item.qty}</div>
+        <div class="dl-price form-input" style="background:var(--bg2); text-align:right;">${item.totalHT.toFixed(3)}</div>
+        <button class="btn-icon" onclick="InvoicesPage.removeItem(${index})">✕</button>
       </div>
-    `);
+    `).join('');
   }
 
-  /* ---------- Mark Paid ---------- */
-  function markPaid(id) {
-    DB.update('invoices', id, { status: 'paid' });
-    showToast('✅ Invoice marked as paid');
-    closeModal();
-    Router.go(Router.current());
+  function removeItem(index) {
+    currentItems.splice(index, 1);
+    renderItemsList();
+    updateTotals();
   }
 
-  /* ---------- Delete ---------- */
-  function remove(id) {
-    if (!confirm('Delete this invoice? This cannot be undone.')) return;
-    DB.remove('invoices', id);
-    showToast('🗑️ Invoice deleted');
-    closeModal();
-    Router.go('invoices');
+  function updateTotals() {
+    const totalHT = currentItems.reduce((sum, item) => sum + item.totalHT, 0);
+    const tva = totalHT * 0.19;
+    const timbre = 1.000;
+    const ttc = totalHT + tva + timbre;
+
+    if(document.getElementById('calc-ht')) {
+      document.getElementById('calc-ht').innerText = totalHT.toFixed(3) + ' DT';
+      document.getElementById('calc-tva').innerText = tva.toFixed(3) + ' DT';
+      document.getElementById('calc-ttc').innerText = ttc.toFixed(3) + ' DT';
+    }
   }
 
-  /* ---------- Render list ---------- */
-  function renderList(container, statusFilter = 'all') {
-    let list = DB.getAll('invoices');
-    if (statusFilter !== 'all') list = list.filter(i => i.status === statusFilter);
-    list.sort((a, b) => b.createdAt - a.createdAt);
+  function saveInvoice() {
+    const clientName = document.getElementById('inv-client').value;
+    const clientMF = document.getElementById('inv-mf').value;
+    const clientLieu = document.getElementById('inv-lieu').value;
 
-    if (!list.length) {
-      container.innerHTML = `<div class="empty"><span class="empty-icon">🧾</span><div class="empty-text">No invoices${statusFilter !== 'all' ? ' with this status' : ''}</div></div>`;
+    if (!clientName || currentItems.length === 0) {
+      alert("Veuillez ajouter un client et au moins un article.");
       return;
     }
 
-    container.innerHTML = list.map(inv => {
-      const cl = DB.getById('clients', inv.clientId);
-      return `
-        <div class="item" onclick="Invoices.preview('${inv.id}')">
-          <div class="item-icon ${statusClass(inv.status)}">📄</div>
-          <div class="item-body">
-            <div class="item-name">${cl ? cl.name : '—'}</div>
-            <div class="item-sub">N° ${inv.num} · ${fmtDate(inv.date)} · ${inv.type || ''}</div>
-          </div>
-          <div class="item-right">
-            <div class="item-amount">${(inv.ttc || 0).toFixed(3)}</div>
-            <div class="item-date"><span class="badge ${inv.status}">${statusLabel(inv.status)}</span></div>
-          </div>
-        </div>`;
-    }).join('');
+    const totalHT = currentItems.reduce((sum, item) => sum + item.totalHT, 0);
+    const tva = totalHT * 0.19;
+    const timbre = 1.000;
+    const ttc = totalHT + tva + timbre;
+
+    const invoice = {
+      number: DB.nextInvoiceNumber(),
+      date: new Date().toISOString().split('T')[0],
+      clientName,
+      clientMF,
+      clientLieu,
+      items: currentItems,
+      totalHT,
+      tva,
+      timbre,
+      ttc,
+      status: 'en attente'
+    };
+
+    DB.insert('invoices', invoice);
+    DB.incrementInvoiceNumber();
+    closeForm();
+    render();
+    
+    // Optional: Show Toast
+    const toast = document.getElementById('toast');
+    toast.innerText = "Facture enregistrée !";
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
   }
 
-  return { showAddModal, addLine, removeLine, calcTotals, save, preview, markPaid, remove, renderList };
+  function closeForm() {
+    document.getElementById('modal-root').innerHTML = '';
+  }
+
+  function viewInvoice(id) {
+    const inv = DB.getById('invoices', id);
+    const set = DB.getSettings();
+    if (!inv) return;
+
+    const modal = document.getElementById('modal-root');
+    modal.innerHTML = `
+      <div class="modal-overlay open">
+        <div class="modal" style="max-width: 800px; background: #fff;">
+          
+          <div class="no-print" style="display:flex; justify-content:flex-end; gap:10px; margin-bottom: 20px;">
+            <button class="btn btn-secondary" onclick="InvoicesPage.closeForm()">Fermer</button>
+            <button class="btn btn-primary" onclick="window.print()">🖨️ Imprimer / PDF</button>
+          </div>
+
+          <div class="invoice-doc">
+            <div class="inv-hdr">
+              <div>
+                <div class="inv-co">${set.company}</div>
+                <div class="inv-co-sub">${set.activity}<br>M.F: ${set.mf}<br>GSM: ${set.phone}</div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 16px; font-weight: bold; color: #000; margin-bottom: 5px;">FACTURE N° : ${inv.number}</div>
+                <div>Date: ${new Date(inv.date).toLocaleDateString('fr-FR')}</div>
+              </div>
+            </div>
+
+            <table border="1" style="width: 100%; border-collapse: collapse; text-align: left; margin-bottom: 20px; border: 1px solid #000;">
+              <tr style="background: #f8f8f8;">
+                <th style="padding: 8px; border: 1px solid #000;">Client</th>
+                <th style="padding: 8px; border: 1px solid #000;">M.F</th>
+                <th style="padding: 8px; border: 1px solid #000;">Lieu</th>
+              </tr>
+              <tr>
+                <td style="padding: 8px; border: 1px solid #000; font-weight:bold;">${inv.clientName}</td>
+                <td style="padding: 8px; border: 1px solid #000;">${inv.clientMF || '-'}</td>
+                <td style="padding: 8px; border: 1px solid #000;">${inv.clientLieu || '-'}</td>
+              </tr>
+            </table>
+
+            <table border="1" style="width: 100%; border-collapse: collapse; text-align: left; margin-bottom: 10px; border: 1px solid #000;">
+              <tr style="background: #f8f8f8;">
+                <th style="padding: 8px; border: 1px solid #000;">Description</th>
+                <th style="padding: 8px; border: 1px solid #000; text-align:center;">Qte</th>
+                <th style="padding: 8px; border: 1px solid #000; text-align:right;">P.UHT</th>
+                <th style="padding: 8px; border: 1px solid #000; text-align:right;">Montant HT</th>
+              </tr>
+              ${inv.items.map(i => `
+                <tr>
+                  <td style="padding: 8px; border: 1px solid #000;">${i.desc}</td>
+                  <td style="padding: 8px; border: 1px solid #000; text-align:center;">${i.qty}</td>
+                  <td style="padding: 8px; border: 1px solid #000; text-align:right;">${i.price.toFixed(3)}</td>
+                  <td style="padding: 8px; border: 1px solid #000; text-align:right;">${i.totalHT.toFixed(3)}</td>
+                </tr>
+              `).join('')}
+            </table>
+
+            <div style="display:flex; justify-content: flex-end;">
+              <table border="1" style="width: 250px; border-collapse: collapse; border: 1px solid #000;">
+                <tr>
+                  <td style="padding: 6px 8px; font-weight: bold; border: 1px solid #000;">Total H.T</td>
+                  <td style="padding: 6px 8px; text-align: right; border: 1px solid #000;">${inv.totalHT.toFixed(3)}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 8px; border: 1px solid #000;">Tva 19% (*)</td>
+                  <td style="padding: 6px 8px; text-align: right; border: 1px solid #000;">${inv.tva.toFixed(3)}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 8px; border: 1px solid #000;">Droit de timbre</td>
+                  <td style="padding: 6px 8px; text-align: right; border: 1px solid #000;">${inv.timbre.toFixed(3)}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px; font-weight: bold; font-size: 14px; background: #eee; border: 1px solid #000;">Total TTC</td>
+                  <td style="padding: 8px; text-align: right; font-weight: bold; font-size: 14px; background: #eee; border: 1px solid #000;">${inv.ttc.toFixed(3)}</td>
+                </tr>
+              </table>
+            </div>
+
+            <div style="margin-top: 30px; font-weight: bold; font-size: 12px;">
+              La présente facture est arrêtée à la somme de : ..............................................................
+            </div>
+            
+            <div style="text-align: right; margin-top: 40px; font-weight: bold; font-size: 13px;">
+              cachet et signature
+            </div>
+
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  return { render, openForm, closeForm, addItem, removeItem, saveInvoice, viewInvoice };
 })();
