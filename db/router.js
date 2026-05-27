@@ -3,30 +3,41 @@ window.Router = (() => {
     dashboard: () => typeof Dashboard !== 'undefined' && Dashboard.render(),
     invoices:  () => typeof InvoicesPage !== 'undefined' && InvoicesPage.render(),
     expenses:  () => typeof ExpensesPage !== 'undefined' && ExpensesPage.render(),
-    clients:   () => typeof ClientsPage !== 'undefined' && ClientsPage.render(),
-    finance:   () => typeof FinancePage !== 'undefined' && FinancePage.render(),
-    settings:  () => typeof SettingsPage !== 'undefined' && SettingsPage.render()
+    clients:   () => typeof ClientsPage !== 'undefined' && ClientsPage.render()
   };
 
   function go(pageName) {
-    // Update bottom navigation UI
+    // 1. Update bottom navigation UI active state
     document.querySelectorAll('.nav-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.page === pageName);
+      if (btn.dataset.page === pageName) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
     });
     
-    // Close any open modals when navigating
+    // 2. Close any open modals
     const modalRoot = document.getElementById('modal-root');
-    if (modalRoot) modalRoot.innerHTML = '';
+    if (modalRoot) {
+      const overlay = modalRoot.querySelector('.modal-overlay');
+      if (overlay) {
+        overlay.classList.remove('open');
+        setTimeout(() => modalRoot.innerHTML = '', 300); // Wait for animation
+      } else {
+        modalRoot.innerHTML = '';
+      }
+    }
 
-    // Load the page
-    if(pages[pageName]) {
+    // 3. Load the requested page
+    const appContainer = document.getElementById('app');
+    if (pages[pageName]) {
       pages[pageName]();
     } else {
-      document.getElementById('app').innerHTML = `<div class="empty">Page not found</div>`;
+      appContainer.innerHTML = `<div class="empty">Page introuvable</div>`;
     }
     
-    // Scroll to top
-    window.scrollTo(0, 0);
+    // 4. Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   return { go };
