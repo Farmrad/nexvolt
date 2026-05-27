@@ -1,15 +1,33 @@
-<script src="db/db.js"></script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexvolt</title>
+  <style>
+    body { background: #0a0e17; color: #ffffff; font-family: -apple-system, sans-serif; margin: 0; padding-bottom: 80px; }
+    .nav-bar { position: fixed; bottom: 0; width: 100%; background: #151a23; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #222; }
+    .nav-btn { cursor: pointer; color: #8b949e; text-align: center; font-size: 12px; }
+    .nav-btn.active { color: #ff9f43; }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <div class="nav-bar">
+    <div class="nav-btn" data-page="Dashboard" onclick="Router.go('Dashboard')">Dashboard</div>
+    <div class="nav-btn" data-page="Invoices" onclick="Router.go('Invoices')">Invoices</div>
+    <div class="nav-btn" data-page="Clients" onclick="Router.go('Clients')">Clients</div>
+    <div class="nav-btn" data-page="Settings" onclick="Router.go('Settings')">Settings</div>
+  </div>
 
-<script src="modules/dashboard.js"></script>
-<script src="modules/clients.js"></script>
-<script src="modules/invoices.js"></script>
-
-<script>
-  // Simple Router logic to inject module into #app
-  function navigate(moduleName) {
-    document.getElementById('app').innerHTML = window[moduleName].render();
-  }
-  
-  // Start the app
-  navigate('Dashboard');
-</script>
+  <script src="db/db.js"></script>
+  <script src="db/router.js"></script>
+  <script src="modules/Dashboard.js"></script>
+  <script src="modules/Clients.js"></script>
+  <script src="modules/Invoices.js"></script>
+  <script src="modules/Expenses.js"></script>
+  <script src="modules/Job.js"></script>
+  <script src="modules/Settings.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
