@@ -1,76 +1,74 @@
-function init_jobs(){
-renderJobs();
-fillClients();
-}
+window.JobPage = (() => {
+  function render() {
+    const app = document.getElementById('app');
+    const jobs = DB.getAll('jobs').sort((a, b) => b.createdAt - a.createdAt);
 
-/* FILL CLIENT SELECT */
-function fillClients(){
+    let html = `
+      <div class="page">
+        <div class="section-hdr">
+          <div class="section-title">Chantiers / Travaux</div>
+          <button class="btn btn-primary btn-sm" onclick="JobPage.openForm()">+ Job</button>
+        </div>
+    `;
 
-const clients = DB.get("clients");
+    if (jobs.length === 0) {
+      html += `<div class="empty">Aucun chantier en cours.</div>`;
+    } else {
+      jobs.forEach(j => {
+        html += `
+          <div class="item">
+            <div class="item-icon blue">⚡</div>
+            <div class="item-body">
+              <div class="item-name">${j.title}</div>
+              <div class="item-sub">Client: ${j.client}</div>
+            </div>
+            <div class="item-right">
+              <div class="status ${j.status === 'Terminé' ? 'paid' : 'unpaid'}">${j.status}</div>
+            </div>
+          </div>
+        `;
+      });
+    }
 
-const select = document.getElementById("clientSelect");
-if(!select) return;
+    html += `</div>`;
+    app.innerHTML = html;
+  }
 
-select.innerHTML = "";
+  function openForm() {
+    const modal = document.getElementById('modal-root');
+    modal.innerHTML = `
+      <div class="modal-overlay open">
+        <div class="modal">
+          <div class="modal-hdr">
+            <div class="modal-title">Nouveau Chantier</div>
+            <button class="modal-close" onclick="JobPage.closeForm()">Fermer</button>
+          </div>
+          <div class="form-group">
+            <input type="text" id="job-title" class="form-input" placeholder="Nom du chantier / Travail">
+          </div>
+          <div class="form-group">
+            <input type="text" id="job-client" class="form-input" placeholder="Client">
+          </div>
+          <button class="btn btn-primary btn-full" onclick="JobPage.saveJob()">Enregistrer</button>
+        </div>
+      </div>
+    `;
+  }
 
-clients.forEach((c,i)=>{
-select.innerHTML += `
-<option value="${i}">
-${c.name}
-</option>
-`;
-});
-}
+  function saveJob() {
+    const title = document.getElementById('job-title').value;
+    const client = document.getElementById('job-client').value;
 
-/* ADD JOB */
-function addJob(){
+    if (!title) return alert("Nom du chantier obligatoire.");
 
-const clientIndex = clientSelect.value;
-const type = jobType.value;
-const total = jobTotal.value;
+    DB.insert('jobs', { title, client, status: 'En cours' });
+    closeForm();
+    render();
+  }
 
-if(!type || !total) return alert("Missing data");
+  function closeForm() {
+    document.getElementById('modal-root').innerHTML = '';
+  }
 
-const clients = DB.get("clients");
-
-DB.push("jobs",{
-client: clients[clientIndex]?.name || "Unknown",
-type,
-total:Number(total),
-date:new Date().toLocaleDateString()
-});
-
-renderJobs();
-
-/* IMPORTANT: refresh AI if dashboard exists */
-if(window.updateAI) updateAI();
-}
-
-/* RENDER JOBS */
-function renderJobs(){
-
-const jobs = DB.get("jobs");
-
-list.innerHTML = jobs.map((j,i)=>`
-
-<div class="card">
-<h3>${j.type}</h3>
-<p>Client: ${j.client}</p>
-<p>${j.total} TND</p>
-<p>${j.date}</p>
-
-<button onclick="deleteJob(${i})">Delete</button>
-</div>
-
-`).join("");
-}
-
-/* DELETE JOB */
-function deleteJob(i){
-const jobs = DB.get("jobs");
-jobs.splice(i,1);
-DB.set("jobs",jobs);
-
-renderJobs();
-if(window.updateAI) updateAI();
-}
+  return { render, openForm, closeForm, saveJob };
+})();
