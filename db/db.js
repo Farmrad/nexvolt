@@ -1,38 +1,24 @@
-/* =========================
-   LOCAL DATABASE ENGINE
-========================= */
+const DB = {
 
-function get(key){
+get(key){
 return JSON.parse(localStorage.getItem(key)) || [];
-}
+},
 
-function set(key,value){
+set(key,value){
 localStorage.setItem(key, JSON.stringify(value));
+},
+
+push(key,item){
+let data = this.get(key);
+data.push(item);
+this.set(key,data);
+return item;
+},
+
+delete(key,index){
+let data = this.get(key);
+data.splice(index,1);
+this.set(key,data);
 }
 
-/* CLIENTS */
-function addClient(client){
-let clients = get("clients");
-clients.push(client);
-set("clients",clients);
-}
-
-function deleteClient(index){
-let clients = get("clients");
-clients.splice(index,1);
-set("clients",clients);
-}
-
-/* JOBS */
-function addJob(job){
-let jobs = get("jobs");
-jobs.push(job);
-set("jobs",jobs);
-}
-
-/* EXPENSES */
-function addExpense(expense){
-let expenses = get("expenses");
-expenses.push(expense);
-set("expenses",expenses);
-}
+};
