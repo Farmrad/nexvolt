@@ -1,6 +1,6 @@
-/* =========================
+/* ============================
    ELECTRICIAN OS PRO
-========================= */
+============================ */
 
 let db;
 
@@ -13,7 +13,7 @@ loadPage("dashboard");
 
 }
 
-/* LOAD PAGES */
+/* LOAD PAGE */
 async function loadPage(page){
 
 const content =
@@ -27,14 +27,25 @@ await res.text();
 
 content.innerHTML = html;
 
-/* LOAD PAGE DATA */
+/* PAGE EVENTS */
 if(page==="dashboard"){
+
 loadDashboard();
+
 drawChart();
+
 }
 
 if(page==="jobs"){
+
 loadClientsIntoSelect();
+
+}
+
+if(page==="invoices"){
+
+initInvoicePage();
+
 }
 
 }
@@ -42,13 +53,30 @@ loadClientsIntoSelect();
 /* DASHBOARD */
 function loadDashboard(){
 
+const jobs =
+JSON.parse(localStorage.getItem("jobs")) || [];
+
+const expenses =
+JSON.parse(localStorage.getItem("expenses")) || [];
+
+const income =
+jobs.reduce((a,b)=>
+a + Number(b.total),0);
+
+const expense =
+expenses.reduce((a,b)=>
+a + Number(b.amount),0);
+
+const profit =
+income - expense;
+
 document.getElementById("income").innerText =
-"5200 TND";
+income + " TND";
 
 document.getElementById("expense").innerText =
-"1800 TND";
+expense + " TND";
 
 document.getElementById("profit").innerText =
-"3400 TND";
+profit + " TND";
 
 }
