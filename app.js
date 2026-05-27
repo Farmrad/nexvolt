@@ -1,189 +1,168 @@
 let db;
-let historyStack = [];
-let invoiceCounter = 1;
+let history = [];
+let invoiceId = 1;
 
-/* ================= INIT ================= */
-
-function initApp() {
-  initDB();
-
-  setTimeout(() => {
-    loadClients();
-    loadClientOptions();
-    loadJobs();
-    loadExpenses();
-    loadInvoices();
-    loadDashboard();
-    loadSettings();
-    initSignaturePad();
-  }, 300);
+function initApp(){
+initDB();
+setTimeout(()=>{
+loadClients();
+loadClientOptions();
+loadJobs();
+loadExpenses();
+loadInvoices();
+loadDashboard();
+loadCashflow();
+},300);
 }
 
-/* ================= NAVIGATION ================= */
-
-function toggleMenu() {
-  document.getElementById("sideMenu").classList.toggle("open");
+/* NAV */
+function toggleMenu(){
+document.getElementById("sideMenu").classList.toggle("open");
 }
 
-function showPage(id) {
-  const current = document.querySelector(".page.active");
-  if (current) historyStack.push(current.id);
+function showPage(id){
+let current=document.querySelector(".page.active");
+if(current)history.push(current.id);
 
-  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-
-  document.getElementById("sideMenu").classList.remove("open");
+document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+document.getElementById(id).classList.add("active");
 }
 
-function goBack() {
-  const last = historyStack.pop();
-  if (!last) return;
+function goBack(){
+let last=history.pop();
+if(!last)return;
 
-  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-  document.getElementById(last).classList.add("active");
+document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+document.getElementById(last).classList.add("active");
 }
 
-/* ================= SIGNATURE ================= */
-
-let canvas, ctx, drawing = false;
-
-function initSignaturePad() {
-  canvas = document.getElementById("signaturePad");
-  if (!canvas) return;
-
-  ctx = canvas.getContext("2d");
-
-  canvas.addEventListener("mousedown", startDraw);
-  canvas.addEventListener("mouseup", stopDraw);
-  canvas.addEventListener("mousemove", draw);
+/* CLIENTS */
+function saveClient(){
+let tx=db.transaction("clients","readwrite");
+tx.objectStore("clients").add({
+name:clientName.value,
+phone:clientPhone.value
+});
+tx.oncomplete=loadClients;
 }
 
-function startDraw(e) {
-  drawing = true;
-  ctx.beginPath();
-  ctx.moveTo(e.offsetX, e.offsetY);
+/* JOBS */
+function saveJob(){
+let tx=db.transaction("jobs","readwrite");
+tx.objectStore("jobs").add({
+clientId:Number(jobClient.value),
+type:jobType.value,
+total:Number(jobTotal.value)
+});
+tx.oncomplete=loadJobs;
 }
 
-function stopDraw() {
-  drawing = false;
+/* EXPENSES */
+function saveExpense(){
+let tx=db.transaction("expenses","readwrite");
+tx.objectStore("expenses").add({
+category:expenseCategory.value,
+amount:Number(expenseAmount.value)
+});
+tx.oncomplete=loadExpenses;
 }
 
-function draw(e) {
-  if (!drawing) return;
-  ctx.lineTo(e.offsetX, e.offsetY);
-  ctx.stroke();
+/* INVOICES */
+function createInvoice(){
+
+let tx=db.transaction(["jobs","clients","invoices"],"readwrite");
+
+let jobStore=tx.objectStore("jobs");
+let clientStore=tx.objectStore("clients");
+let invStore=tx.objectStore("invoices");
+
+let jobReq=jobStore.get(Number(invoiceJob.value));
+
+jobReq.onsuccess=()=>{
+
+let job=jobReq.result;
+let clientReq=clientStore.get(job.clientId);
+
+clientReq.onsuccess=()=>{
+
+let client=clientReq.result;
+
+let tva=Number(tvaRate.value||19);
+let tvaAmount=job.total*tva/100;
+
+let number=String(invoiceId++).padStart(4,"0");
+
+invStore.add({
+number,
+clientName:client.name,
+jobType:job.type,
+subtotal:job.total,
+tva,
+tvaAmount,
+total:job.total+tvaAmount,
+paid:false,
+date:new Date().toLocaleDateString()
+});
+
+tx.oncomplete=loadInvoices;
+};
+};
 }
 
-function clearSignature() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+/* CASHFLOW */
+function loadCashflow(){
+
+let tx=db.transaction("invoices","readonly");
+let req=tx.objectStore("invoices").getAll();
+
+req.onsuccess=()=>{
+
+let unpaid=req.result.filter(i=>!i.paid);
+
+unpaidList.innerHTML=unpaid.map(i=>`
+<div class="unpaid">
+${i.number} - ${i.clientName}<br>
+${i.total} TND
+<button onclick="markPaid(${i.id})">Paid</button>
+</div>
+`).join("");
+
+unpaidTotal.innerText=unpaid.reduce((a,b)=>a+b.total,0)+" TND";
+};
 }
 
-function saveSignature() {
-  const signature = canvas.toDataURL();
+function markPaid(id){
+let tx=db.transaction("invoices","readwrite");
+let store=tx.objectStore("invoices");
 
-  localStorage.setItem("job_signature", signature);
-  alert("Signature saved");
+let req=store.get(id);
+req.onsuccess=()=>{
+let i=req.result;
+i.paid=true;
+store.put(i);
+loadCashflow();
+};
 }
 
-/* ================= PHOTOS ================= */
+/* DASHBOARD */
+function loadDashboard(){
 
-function addJobPhoto() {
-  const file = document.getElementById("jobPhoto").files[0];
+let tx=db.transaction(["jobs","expenses"],"readonly");
 
-  if (!file) return;
+let j=tx.objectStore("jobs").getAll();
+let e=tx.objectStore("expenses").getAll();
 
-  const reader = new FileReader();
+j.onsuccess=()=>{
+e.onsuccess=()=>{
 
-  reader.onload = function(e) {
+let income=j.result.reduce((a,b)=>a+b.total,0);
+let expense=e.result.reduce((a,b)=>a+b.amount,0);
 
-    let img = document.createElement("img");
-    img.src = e.target.result;
-    img.style.width = "100px";
-    img.style.margin = "5px";
-
-    document.getElementById("photoPreview").appendChild(img);
-
-    let photos = JSON.parse(localStorage.getItem("job_photos") || "[]");
-    photos.push(e.target.result);
-
-    localStorage.setItem("job_photos", JSON.stringify(photos));
-  };
-
-  reader.readAsDataURL(file);
+income.innerText=income;
+expense.innerText=expense;
+profit.innerText=income-expense;
+};
+};
 }
 
-/* ================= BACKUP SYSTEM ================= */
-
-function exportBackup() {
-
-  let data = {
-    clients: [],
-    jobs: [],
-    expenses: [],
-    invoices: []
-  };
-
-  let stores = ["clients","jobs","expenses","invoices"];
-
-  let tx = db.transaction(stores, "readonly");
-
-  let promises = stores.map(store => {
-    return new Promise(resolve => {
-      let req = tx.objectStore(store).getAll();
-      req.onsuccess = () => resolve({ [store]: req.result });
-    });
-  });
-
-  Promise.all(promises).then(results => {
-
-    results.forEach(r => Object.assign(data, r));
-
-    let blob = new Blob([JSON.stringify(data)], { type: "application/json" });
-
-    let a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "nexvolt_backup.json";
-    a.click();
-  });
-}
-
-function importBackup(event) {
-
-  let file = event.target.files[0];
-  let reader = new FileReader();
-
-  reader.onload = function(e) {
-
-    let data = JSON.parse(e.target.result);
-
-    let stores = Object.keys(data);
-
-    let tx = db.transaction(stores, "readwrite");
-
-    stores.forEach(store => {
-
-      let os = tx.objectStore(store);
-
-      data[store].forEach(item => {
-        os.put(item);
-      });
-    });
-
-    alert("Backup restored");
-  };
-
-  reader.readAsText(file);
-}
-
-/* ================= PLACEHOLDER (KEEP YOUR OLD SYSTEMS) ================= */
-
-/* KEEP ALL YOUR PREVIOUS FUNCTIONS:
-   - clients
-   - jobs
-   - invoices
-   - expenses
-   - dashboard
-   - pdf
-   - whatsapp
-   (unchanged, still working)
-*/
+/* PLACEHOLDERS (DB + LOAD FUNCTIONS EXIST IN YOUR PROJECT) */
