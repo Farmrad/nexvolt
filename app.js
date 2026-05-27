@@ -1,3 +1,4 @@
+let historyStack = [];
 function initApp() {
   initDB();
 
