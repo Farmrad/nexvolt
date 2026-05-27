@@ -16,24 +16,14 @@ function showPage(id) {
   document.getElementById(id).classList.add("active");
 }
 
-/* ================= CLIENTS ================= */
+/* CLIENTS */
 function saveClient() {
   let tx = db.transaction("clients","readwrite");
-
   tx.objectStore("clients").add({
     name: clientName.value,
     phone: clientPhone.value
   });
 
-  tx.oncomplete = () => {
-    loadClients();
-    loadClientOptions();
-  };
-}
-
-function deleteClient(id){
-  let tx = db.transaction("clients","readwrite");
-  tx.objectStore("clients").delete(id);
   tx.oncomplete = () => {
     loadClients();
     loadClientOptions();
@@ -46,10 +36,7 @@ function loadClients() {
 
   req.onsuccess = () => {
     clientsList.innerHTML = req.result.reverse().map(c =>
-      `<div class="job-card">
-        ${c.name} - ${c.phone}
-        <button onclick="deleteClient(${c.id})">Delete</button>
-      </div>`
+      `<div class="job-card">${c.name} - ${c.phone}</div>`
     ).join("");
   };
 }
@@ -65,7 +52,7 @@ function loadClientOptions() {
   };
 }
 
-/* ================= JOBS ================= */
+/* JOBS */
 function saveJob() {
   let tx = db.transaction("jobs","readwrite");
 
@@ -76,15 +63,6 @@ function saveJob() {
     status: jobStatus.value
   });
 
-  tx.oncomplete = () => {
-    loadJobs();
-    loadDashboard();
-  };
-}
-
-function deleteJob(id){
-  let tx = db.transaction("jobs","readwrite");
-  tx.objectStore("jobs").delete(id);
   tx.oncomplete = () => {
     loadJobs();
     loadDashboard();
@@ -106,12 +84,10 @@ function loadJobs() {
         req.onsuccess = () => r(req.result);
       });
 
-      html += `
-      <div class="job-card">
+      html += `<div class="job-card">
         ${j.type}<br>
         ${c?.name || "Unknown"}<br>
         ${j.total} TND - ${j.status}
-        <button onclick="deleteJob(${j.id})">Delete</button>
       </div>`;
     }
 
@@ -119,7 +95,7 @@ function loadJobs() {
   };
 }
 
-/* ================= EXPENSES ================= */
+/* EXPENSES */
 function saveExpense() {
   let tx = db.transaction("expenses","readwrite");
 
@@ -134,31 +110,18 @@ function saveExpense() {
   };
 }
 
-function deleteExpense(id){
-  let tx = db.transaction("expenses","readwrite");
-  tx.objectStore("expenses").delete(id);
-
-  tx.oncomplete = () => {
-    loadExpenses();
-    loadDashboard();
-  };
-}
-
 function loadExpenses() {
   let tx = db.transaction("expenses","readonly");
   let req = tx.objectStore("expenses").getAll();
 
   req.onsuccess = () => {
     expensesList.innerHTML = req.result.reverse().map(e =>
-      `<div class="job-card">
-        ${e.category} - ${e.amount}
-        <button onclick="deleteExpense(${e.id})">Delete</button>
-      </div>`
+      `<div class="job-card">${e.category} - ${e.amount}</div>`
     ).join("");
   };
 }
 
-/* ================= INVOICES ================= */
+/* INVOICES */
 function createInvoice() {
   let tx = db.transaction(["jobs","invoices"],"readwrite");
 
@@ -184,12 +147,6 @@ function createInvoice() {
   };
 }
 
-function deleteInvoice(id){
-  let tx = db.transaction("invoices","readwrite");
-  tx.objectStore("invoices").delete(id);
-  tx.oncomplete = loadInvoices;
-}
-
 function loadInvoices() {
   let tx = db.transaction("invoices","readonly");
   let req = tx.objectStore("invoices").getAll();
@@ -198,13 +155,12 @@ function loadInvoices() {
     invoiceList.innerHTML = req.result.reverse().map(i =>
       `<div class="job-card">
         Sub:${i.subtotal} | TVA:${i.tva}% | Total:${i.total}
-        <button onclick="deleteInvoice(${i.id})">Delete</button>
       </div>`
     ).join("");
   };
 }
 
-/* ================= DASHBOARD ================= */
+/* DASHBOARD */
 function loadDashboard() {
   let tx = db.transaction(["jobs","expenses"],"readonly");
 
@@ -217,9 +173,9 @@ function loadDashboard() {
       let income = jReq.result.reduce((a,b)=>a+b.total,0);
       let expense = eReq.result.reduce((a,b)=>a+b.amount,0);
 
-      totalIncome.innerText = income+" TND";
-      totalExpenses.innerText = expense+" TND";
-      profit.innerText = (income-expense)+" TND";
+      totalIncome.innerText = income + " TND";
+      totalExpenses.innerText = expense + " TND";
+      profit.innerText = (income - expense) + " TND";
       totalJobs.innerText = jReq.result.length;
     };
   };
