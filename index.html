@@ -18,13 +18,13 @@
 <!-- SIDEBAR -->
 <div class="sidebar">
 
-<h2>⚡ Nexvolt</h2>
+<div class="logo">⚡ Nexvolt</div>
 
-<button onclick="showPage('dashboard')">Dashboard</button>
-<button onclick="showPage('jobs')">Jobs</button>
-<button onclick="showPage('clients')">Clients</button>
-<button onclick="showPage('expenses')">Expenses</button>
-<button onclick="showPage('invoices')">Invoices</button>
+<button class="nav-btn" onclick="showPage('dashboard')">Dashboard</button>
+<button class="nav-btn" onclick="showPage('jobs')">Jobs</button>
+<button class="nav-btn" onclick="showPage('clients')">Clients</button>
+<button class="nav-btn" onclick="showPage('expenses')">Expenses</button>
+<button class="nav-btn" onclick="showPage('invoices')">Invoices</button>
 
 </div>
 
@@ -32,51 +32,50 @@
 <div class="main">
 
 <!-- DASHBOARD -->
-<section id="dashboard" class="page active">
+<section id="dashboard" class="page active fade">
 
-<h1>Dashboard</h1>
+<h1 class="title">Dashboard</h1>
 
 <div class="grid">
 
-<div class="card gradient">
+<div class="card glass hover-up green">
 <h3>Income</h3>
 <p id="income">0 TND</p>
 </div>
 
-<div class="card gradient2">
+<div class="card glass hover-up red">
 <h3>Expenses</h3>
 <p id="expense">0 TND</p>
 </div>
 
-<div class="card gradient3">
+<div class="card glass hover-up blue">
 <h3>Profit</h3>
 <p id="profit">0 TND</p>
 </div>
 
-<div class="card dark">
+<div class="card glass hover-up dark">
 <h3>Unpaid</h3>
 <p id="unpaid">0 TND</p>
 </div>
 
 </div>
 
-<!-- CHART -->
-<div class="card">
+<div class="card chart-card hover-up">
 <canvas id="chart"></canvas>
 </div>
 
 </section>
 
 <!-- JOBS -->
-<section id="jobs" class="page">
+<section id="jobs" class="page fade">
 
 <h2>Jobs</h2>
 
-<div class="card">
+<div class="card glass hover-up">
 <select id="jobClient"></select>
 <input id="jobType" placeholder="Job type">
 <input id="jobTotal" type="number" placeholder="Price">
-<button onclick="saveJob()">Save Job</button>
+<button class="btn" onclick="saveJob()">Save Job</button>
 </div>
 
 <div id="jobsList"></div>
@@ -84,13 +83,14 @@
 </section>
 
 <!-- CLIENTS -->
-<section id="clients" class="page">
+<section id="clients" class="page fade">
+
 <h2>Clients</h2>
 
-<div class="card">
+<div class="card glass hover-up">
 <input id="clientName" placeholder="Name">
 <input id="clientPhone" placeholder="Phone">
-<button onclick="saveClient()">Save</button>
+<button class="btn" onclick="saveClient()">Save</button>
 </div>
 
 <div id="clientsList"></div>
@@ -98,13 +98,14 @@
 </section>
 
 <!-- EXPENSES -->
-<section id="expenses" class="page">
+<section id="expenses" class="page fade">
+
 <h2>Expenses</h2>
 
-<div class="card">
+<div class="card glass hover-up">
 <input id="expenseCategory" placeholder="Category">
 <input id="expenseAmount" type="number" placeholder="Amount">
-<button onclick="saveExpense()">Add</button>
+<button class="btn" onclick="saveExpense()">Add</button>
 </div>
 
 <div id="expensesList"></div>
@@ -112,13 +113,14 @@
 </section>
 
 <!-- INVOICES -->
-<section id="invoices" class="page">
+<section id="invoices" class="page fade">
+
 <h2>Invoices</h2>
 
-<div class="card">
+<div class="card glass hover-up">
 <select id="invoiceJob"></select>
 <input id="tvaRate" type="number" placeholder="TVA %">
-<button onclick="createInvoice()">Generate</button>
+<button class="btn" onclick="createInvoice()">Generate</button>
 </div>
 
 <div id="invoiceList"></div>
@@ -126,7 +128,6 @@
 </section>
 
 </div>
-
 </div>
 
 <script src="db.js"></script>
